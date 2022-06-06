@@ -32,10 +32,6 @@ def post_by_Id(id):
         if p['id'] == id:
          return p
 
-@app.get("/sqlalchemy")
-def test_posts(db: Session = Depends(get_db)):
-    return{"status":"success"}
-
 @app.get("/getAll")
 async def get_all(db: Session = Depends(get_db)):
     allPost = db.query(models.Post).all()
