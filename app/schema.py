@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 # Post models
@@ -13,6 +13,7 @@ class CreatePost(PostBase): #The "createPost" class will automatically inherit t
 
 #Return response (this only returns listed fields)
 class PostOpt(BaseModel):
+    id: int
     title: str
     content: str
     published: bool
@@ -28,8 +29,15 @@ class UserBase(BaseModel):
     created_at: datetime
 
 class CreateUser(UserBase):
-    pass
-
-class UserOpt(BaseModel):
     username: str
     email: str
+    password: str
+    created_at: datetime
+
+class UserOpt(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    created_at: datetime
+    class Config:
+       orm_mode = True

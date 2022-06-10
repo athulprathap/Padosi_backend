@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
@@ -27,7 +27,7 @@ while True:
         time.sleep(4)
 
 
-@app.get("/getAll", response_model=schema.PostOpt)
+@app.get("/getAll", response_model=List[schema.PostOpt])
 async def get_all(db: Session = Depends(get_db)):
     allPost = db.query(models.Post).all()
     return  allPost 
@@ -46,7 +46,7 @@ async def create_post(post:schema.CreatePost, db: Session = Depends(get_db)):
 @app.get("/getOne/{id}",  response_model=schema.PostOpt)
 async def get_post(id:int, db:Session = Depends(get_db)):
     singlePost = db.query(models.Post).filter(models.Post.id == id).first()
-    
+
     if not singlePost:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=post)
 
@@ -79,15 +79,15 @@ async def editPost(id:int, update_post:schema.CreatePost, db: Session = Depends(
 
     return  editedPost.first()
 
-@app.post('/user', response_model=schema.UserOpt)
-async def createUser(user:schema.CreateUser, db:Session = Depends(get_db)):
-    user = models.post(**user.dict())
+@app.post("/user", status_code=status.HTTP_201_CREATED, response_model=schema.UserOpt)
+async def createUser(user: schema.CreateUser, db:Session = Depends(get_db)):
+    newUser = models.User(**user.dict())
 
-    if not user:
+    if not newUser:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"user with id:{id} does not exist!")
 
-    db.add(user)
+    db.add(newUser)
     db.commit()
-    db.refresh(user)
+    db.refresh(newUser)
 
-    return user
+    return newUser
