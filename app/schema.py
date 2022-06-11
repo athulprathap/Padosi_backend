@@ -8,11 +8,12 @@ class PostBase(BaseModel):
     published: bool = True
     created_at = datetime
 
-class CreatePost(PostBase): #The "createPost" class will automatically inherit the "PostBase" proprties and populate every field
+#The "createPost" class will automatically inherit the "PostBase" proprties and populate every field
+class CreatePost(PostBase): 
     pass
 
-#Return response (this only returns listed fields)
-class PostOpt(BaseModel):
+
+class PostOpt(BaseModel):  #(returns listed fields for Post)
     id: int
     title: str
     content: str
@@ -31,7 +32,7 @@ class UserBase(BaseModel):
 class CreateUser(UserBase):
      pass
 
-class UserOpt(BaseModel):
+class UserOpt(BaseModel):  #(this only returns listed fields for User)
     id: int
     username: str
     email: EmailStr
