@@ -26,18 +26,14 @@ class UserBase(BaseModel):
     username: str
     email: str
     password: str
-    created_at: datetime
+    created_at = datetime 
 
 class CreateUser(UserBase):
-    username: str
-    email: str
-    password: str
-    created_at: datetime
+     pass
 
 class UserOpt(BaseModel):
     id: int
     username: str
     email: EmailStr
-    created_at: datetime
     class Config:
-       orm_mode = True
+        orm_mode = True

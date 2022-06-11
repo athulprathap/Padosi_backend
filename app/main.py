@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
+from passlib.context import CryptContext
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -10,6 +11,7 @@ from sqlalchemy.orm import Session
 import models, schema
 from database import engine, Base, get_db
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -79,13 +81,13 @@ async def editPost(id:int, update_post:schema.CreatePost, db: Session = Depends(
 
     return  editedPost.first()
 
-@app.post("/user", status_code=status.HTTP_201_CREATED, response_model=schema.UserOpt)
-async def createUser(user: schema.CreateUser, db:Session = Depends(get_db)):
-    newUser = models.User(**user.dict())
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schema.UserOpt)
+async def create(users: schema.CreateUser, db:Session = Depends(get_db)):
 
-    if not newUser:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"user with id:{id} does not exist!")
+    hashed_password = pwd_context.hash(users.password)
+    users.password = hashed_password
 
+    newUser = models.User(**users.dict())
     db.add(newUser)
     db.commit()
     db.refresh(newUser)
