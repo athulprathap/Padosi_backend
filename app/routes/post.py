@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import models, schema
 from database import  get_db
 
-router = APIRouter()
+router = APIRouter(tags = ['Posts'])
 
 
 @router.get("/getAll", response_model=List[schema.PostOpt])
@@ -28,7 +28,7 @@ async def get_post(id:int, db:Session = Depends(get_db)):
     singlePost = db.query(models.Post).filter(models.Post.id == id).first()
 
     if not singlePost:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=post)
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
 
     return singlePost
 

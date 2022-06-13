@@ -4,7 +4,7 @@ from database import  get_db
 import models, schema, utils
 
 
-router = APIRouter()
+router = APIRouter( tags = ['Users'])
 
 @router.post("/users", status_code=status.HTTP_201_CREATED, response_model=schema.UserOpt)
 async def create(users: schema.CreateUser, db:Session = Depends(get_db)):
@@ -25,6 +25,6 @@ async def get_user(id:int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
 
     if not user:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=users)
-        
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
+
     return user
