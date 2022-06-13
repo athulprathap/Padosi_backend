@@ -37,4 +37,8 @@ class UserOpt(BaseModel):  #(this only returns listed fields for User)
     username: str
     email: EmailStr
     class Config:
-        orm_mode = True
+        orm_mod = True
+
+class UserAuth(BaseModel):
+    email: EmailStr
+    password: str
