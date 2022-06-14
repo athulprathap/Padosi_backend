@@ -1,14 +1,13 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
-from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from sqlalchemy.orm import Session
-import models, schema
 from database import engine, Base, get_db
+from routes import post, user, auth
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,6 +25,7 @@ while True:
         print('error: ',  error)
         time.sleep(4)
 
+<<<<<<< HEAD
 
 @app.get("/getAll", response_model=schema.ReturnedFields)
 async def get_all(db: Session = Depends(get_db)):
@@ -75,3 +75,8 @@ def editPost(id:int, update_post:schema.CreatePost, db: Session = Depends(get_db
     db.commit()
 
     return  editedPost.first()
+=======
+app.include_router(post.router)
+app.include_router(user.router)
+app.include_router(auth.router)
+>>>>>>> 5243f632015ecf3749147a8edbeb28badce479b7
