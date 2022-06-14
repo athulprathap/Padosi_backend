@@ -27,11 +27,6 @@ while True:
         time.sleep(4)
 
 
-# def post_by_Id(id):
-#     for p in myPost:
-#         if p['id'] == id:
-#          return p
-
 @app.get("/getAll", response_model=schema.ReturnedFields)
 async def get_all(db: Session = Depends(get_db)):
     allPost = db.query(models.Post).all()
