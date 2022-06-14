@@ -6,7 +6,7 @@ import models, schema, utils
 
 router = APIRouter( tags = ['Users'])
 
-@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=schema.UserOpt)
+@router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=schema.UserOpt)
 async def create(users: schema.CreateUser, db:Session = Depends(get_db)):
 
     hashed_password = utils.hash(users.password)
