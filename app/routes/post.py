@@ -1,7 +1,7 @@
 from typing import  List
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-import models, schema
+import models, schema, oauth2
 from database import  get_db
 
 router = APIRouter(tags = ['Posts'])
@@ -14,8 +14,9 @@ async def get_all(db: Session = Depends(get_db)):
 
 
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
-async def create_post(post:schema.CreatePost, db: Session = Depends(get_db)):
-    newPost = models.Post(**post.dict())  #Note: '**post.dict' is a substitude for writing list of schema properties such post.title ,post.content etc
+async def create_post(post:schema.CreatePost, db: Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
+
+    newPost = models.Post(**post.dict())  
     db.add(newPost)
     db.commit()
     db.refresh(newPost)
