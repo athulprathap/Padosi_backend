@@ -39,12 +39,12 @@ async def get_post(id:int, db:Session = Depends(get_db), get_current_user:int = 
 @router.delete("/delete/{id}", status_code = status.HTTP_204_NO_CONTENT)
 async def delete_Post(id:int, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
 
-    deletePost = db.query(models.Post).filter(models.Post.id == id).first()
+    post = db.query(models.Post).filter(models.Post.id == id).delete()
 
-    if not deletePost:
+    if not post:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"post id:{id} does not exist!")
 
-        deletePost.delete(synchronize_session=False)
+        # post.delete(synchronize_session=False)
         db.commit()
     
     return Response(status_code = status.HTTP_204_NO_CONTENT)
