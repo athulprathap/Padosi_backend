@@ -9,13 +9,13 @@ router = APIRouter(tags = ['Posts'])
 
 @router.get("/getAll", response_model=List[schema.PostOpt])
 async def get_all(db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
-    
+
     allPost = db.query(models.Post).all()
     return  allPost 
 
 
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
-async def create_post(post:schema.CreatePost, db: Session = Depends(get_db), user_id:int = Depends(oauth2.get_current_user)):
+async def create_post(post:schema.CreatePost, db: Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
 
     newPost = models.Post(**post.dict())  
     db.add(newPost)
@@ -26,7 +26,7 @@ async def create_post(post:schema.CreatePost, db: Session = Depends(get_db), use
 
 
 @router.get("/getOne/{id}",  response_model=schema.PostOpt)
-async def get_post(id:int, db:Session = Depends(get_db), user_id:int = Depends(oauth2.get_current_user)):
+async def get_post(id:int, db:Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
 
     singlePost = db.query(models.Post).filter(models.Post.id == id).first()
 
@@ -37,7 +37,7 @@ async def get_post(id:int, db:Session = Depends(get_db), user_id:int = Depends(o
 
 
 @router.delete("/delete/{id}", status_code = status.HTTP_204_NO_CONTENT)
-async def delete_Post(id:int, db: Session = Depends(get_db)):
+async def delete_Post(id:int, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
 
     deletePost = db.query(models.Post).filter(models.Post.id == id).first()
 
@@ -51,7 +51,7 @@ async def delete_Post(id:int, db: Session = Depends(get_db)):
 
 
 @router.put("/edit/{id}",  response_model=schema.PostOpt)
-async def editPost(id:int, update_post:schema.CreatePost, db: Session = Depends(get_db), get_cuurent_user: int = Depends(oauth2.get_current_user)):
+async def editPost(id:int, update_post:schema.CreatePost, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
 
     editedPost = db.query(models.Post).filter(models.Post.id == id)
     post = editedPost.first()
