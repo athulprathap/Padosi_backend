@@ -25,7 +25,7 @@ class PostOpt(BaseModel):  #(returns listed fields for Post)
 
 # User models
 class UserBase(BaseModel):
-    username: str
+    username: str 
     email: str
     password: str
     created_at = datetime 
