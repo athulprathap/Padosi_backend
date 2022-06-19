@@ -37,15 +37,14 @@ async def get_post(id:int, db:Session = Depends(get_db), get_current_user:int = 
 
 
 @router.delete("/delete/{id}", status_code = status.HTTP_204_NO_CONTENT)
-async def delete_Post(id:int, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
+async def delete_Post(id: int, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
 
-    post = db.query(models.Post).filter(models.Post.id == id).delete()
+    deletedPost = db.query(models.Post).filter(models.Post.id == id).delete()
 
-    if not post:
+    if not deletedPost:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"post id:{id} does not exist!")
 
-        # post.delete(synchronize_session=False)
-        db.commit()
+    db.commit()
     
     return Response(status_code = status.HTTP_204_NO_CONTENT)
 
@@ -54,7 +53,7 @@ async def delete_Post(id:int, db: Session = Depends(get_db), get_current_user: i
 async def editPost(id:int, update_post:schema.CreatePost, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
 
     editedPost = db.query(models.Post).filter(models.Post.id == id)
-    post = editedPost.first()
+    post = editedPost
 
     if not post:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, datail=f"post with id:{id} does not exist!")
