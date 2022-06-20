@@ -12,12 +12,14 @@ class PostBase(BaseModel):
 #The "createPost" class will automatically inherit the "PostBase" proprties and populate every field
 class CreatePost(PostBase): 
     pass
+    
 class PostOpt(BaseModel):  #(returns listed fields for Post)
     id: int
     title: str
     content: str
     published: bool
     user_id : int
+
     class Config:
         orm_mode = True
 
