@@ -15,6 +15,6 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
     if not utils.verify(user_info.password, user.password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
 
-    token = oauth2.access_token(data={"user_id": user.id})
+    token = oauth2.access_token(data={"users_id": user.id})
 
     return {"access_token": token, "token_type":"bearer"}

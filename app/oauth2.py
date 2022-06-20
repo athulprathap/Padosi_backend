@@ -10,7 +10,7 @@ oauth2_schema = OAuth2PasswordBearer(tokenUrl='login')
 
 SECRET_KEY = "039rhfj4994yrcbrt74r47rt7cgrt847r982927847743rtgc98y47n"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTE = 45
+ACCESS_TOKEN_EXPIRE_MINUTE = 60
 
 # Login access for registered user
 def access_token(data: dict):
@@ -26,7 +26,7 @@ def access_token(data: dict):
 def verify_access_token(token, credentials_exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
-        id = payload.get("user_id")
+        id = payload.get("users_id")
 
         if not id:
             raise credentials_exception

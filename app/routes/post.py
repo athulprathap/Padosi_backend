@@ -17,6 +17,7 @@ async def get_all(db: Session = Depends(get_db), account_owner: int = Depends(oa
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
 async def create_post(post:schema.CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
 
+# "user_id = account_owner.id" identifies the owner of a post created by its id....
     newPost = models.Post(user_id= account_owner.id, **post.dict())  
     db.add(newPost)
     db.commit()
