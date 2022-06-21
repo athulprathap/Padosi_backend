@@ -17,7 +17,6 @@ class UserOpt(BaseModel):  #(this only returns listed fields for User)
     username: str
     email: EmailStr
     created_at = datetime 
-
     class Config:
         orm_mode = True
 
@@ -29,10 +28,8 @@ class PostOpt(BaseModel):  #(returns listed fields for Post)
     published: bool
     user_id : int
     user : UserOpt
-
     class Config:
         orm_mode = True
-
 
 # User models
 class UserBase(BaseModel):

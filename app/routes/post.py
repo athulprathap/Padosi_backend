@@ -1,4 +1,4 @@
-from typing import  List
+from typing import  List, Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 import models, schema, oauth2
@@ -15,10 +15,10 @@ async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Dep
 
 
 @router.get("/allPosts", response_model=List[schema.PostOpt])
-async def get_allPost(db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-    allPost = db.query(models.Post).all()
+async def get_allPost(db: Session = Depends(get_db), limit:int = 6, skip:int = 0, search: Optional[str] = "", account_owner: int = Depends(oauth2.get_current_user)):
+    allPost = db.query(models.Post).filter(models.Post.title.contains(search)).all()
     
-    return allPost
+    return allPost[limit+skip]
     
 
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
