@@ -19,8 +19,7 @@ class UserOpt(BaseModel):  #(this only returns listed fields for User)
     created_at = datetime 
     class Config:
         orm_mode = True
-
-    
+        
 class PostOpt(BaseModel):  #(returns listed fields for Post)
     id: int
     title: str
