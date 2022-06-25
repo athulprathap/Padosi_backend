@@ -53,7 +53,7 @@ async def like_post(like: schema.Likes, db: Session = Depends(get_db), account_o
         if not isLiked:
             raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail= f"Like not found!")
          
-        query_like .delete()
+        query_like.delete()
         db.commit()
         
         return {"msg": "You unliked this post"}
