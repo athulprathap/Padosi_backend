@@ -1,3 +1,3 @@
-**/Fast-Social-Media-App/venv/**
-**/Fast-Social-Media-App/app/.env/**
-**/Fast-Social-Media-App/__pycache__/**
+venv/
+.env/
+__pycache__/
