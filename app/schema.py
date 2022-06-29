@@ -21,13 +21,17 @@ class UserOpt(BaseModel):  #(this only returns listed fields for User)
     class Config:
         orm_mode = True
         
-class PostOpt(BaseModel):  #(returns listed fields for Post)
+class PostOpt(PostBase):  #(returns listed fields for Post)
     id: int
-    title: str
-    content: str
     published: bool
     user_id : int
     user : UserOpt
+    class Config:
+        orm_mode = True
+
+class PostAll(BaseModel):
+    Post: PostOpt
+    likes: int
     class Config:
         orm_mode = True
 
