@@ -18,14 +18,14 @@ async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Dep
 @router.get("/allPosts", response_model=List[schema.PostAll])
 async def get_allPost(db: Session = Depends(get_db), limit:int = 6, skip:int = 0, option: Optional[str] = "", account_owner: int = Depends(oauth2.get_current_user)):
     
-    allPost = db.query(models.Post).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
+    # allPost = db.query(models.Post).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
     
     
     # join tables and get the results
-    results = db.query(models.Post, func.count(models.Like.post_id).label("likes")).join(models.Like, models.Like.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
+    allPost  = db.query(models.Post, func.count(models.Like.post_id).label("likes")).join(models.Like, models.Like.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
         
     
-    return results
+    return allPost 
     
 # Create a Post
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
@@ -69,7 +69,9 @@ async def like_post(like: schema.Likes, db: Session = Depends(get_db), account_o
 @router.get("/getOne/{id}",  response_model=schema.PostOpt)
 async def get_post(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
 
-    singlePost = db.query(models.Post).filter(models.Post.id == id).first()
+    # singlePost = db.query(models.Post).filter(models.Post.id == id).first()
+    
+    singlePost = db.query(models.Post, func.count(models.Like.post_id).label("likes")).join(models.Like, models.Like.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id).first()
 
     if not singlePost:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
