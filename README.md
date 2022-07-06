@@ -16,12 +16,12 @@
   <img alt="Repository size" src="https://img.shields.io/github/repo-size/Padosi-Oneworld/Padosi_backend?color=56BEB8">
 
   <img alt="License" src="https://img.shields.io/github/license/Padosi-Oneworld/Padosi_backend?color=56BEB8">
+  
+  <img alt="Github issues" src="https://img.shields.io/github/issues/Padosi-Oneworld/Padosi_backend?color=56BEB8" /> 
 
-  <!-- <img alt="Github issues" src="https://img.shields.io/github/issues/{{YOUR_GITHUB_USERNAME}}/padosi-backend?color=56BEB8" /> -->
+  <img alt="Github forks" src="https://img.shields.io/github/forks/Padosi-Oneworld/Padosi_backend?color=56BEB8" /> 
 
-  <!-- <img alt="Github forks" src="https://img.shields.io/github/forks/{{YOUR_GITHUB_USERNAME}}/padosi-backend?color=56BEB8" /> -->
-
-  <!-- <img alt="Github stars" src="https://img.shields.io/github/stars/{{YOUR_GITHUB_USERNAME}}/padosi-backend?color=56BEB8" /> -->
+  <img alt="Github stars" src="https://img.shields.io/github/stars/Padosi-Oneworld/Padosi_backendd?color=56BEB8" /> 
 </p>
 
 <!-- Status -->
