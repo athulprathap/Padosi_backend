@@ -50,10 +50,7 @@ Padosi Backend
 
 ## :sparkles: Important Resources ##
 
-:heavy_check_mark: Feature 1;\ [FastApi Blog](https://www.jeffastor.com/blog/designing-a-robust-user-model-in-a-fastapi-app)
-
-:heavy_check_mark: Feature 2;\
-:heavy_check_mark: Feature 3;
+:heavy_check_mark: Feature 1; [FastApi Blog](https://www.jeffastor.com/blog/designing-a-robust-user-model-in-a-fastapi-app)
 
 ## :rocket: Technologies ##
 
