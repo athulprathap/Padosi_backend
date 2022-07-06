@@ -55,7 +55,7 @@ $ cd padosi-backend
 $ pip install -r requirements.txt
 
 # build the project --build
-$ sudo docker compose up
+$ sudo docker compose up --build
 
 # Run the project
 $ sudo docker-compose up 
