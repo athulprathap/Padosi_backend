@@ -1,5 +1,5 @@
 <div align="center" id="top"> 
-  <img src="./.github/app.gif" alt="Padosi Backend" />
+  <img src="https://giphy.com/gifs/producthunt-github-projects-l0HlDqMIpy8OMWeIM" alt="Padosi Backend" />
 
   &#xa0;
 
