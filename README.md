@@ -1,28 +1,7 @@
-<div align="center" id="top"> 
-  <img src="./github/app.gif/" alt="Padosi Backend" />
-
-  &#xa0;
-
-  <!-- <a href="https://padosibackend.netlify.app">Demo</a> -->
+ <!-- <a href="https://padosibackend.netlify.app">Demo</a> -->
 </div>
 
 <h1 align="center">Padosi Backend</h1>
-
-<p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/Padosi-Oneworld/Padosi_backend?color=56BEB8">
-
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/Padosi-Oneworld/Padosi_backend?color=56BEB8">
-
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/Padosi-Oneworld/Padosi_backend?color=56BEB8">
-
-  <img alt="License" src="https://img.shields.io/github/license/Padosi-Oneworld/Padosi_backend?color=56BEB8">
-  
-  <img alt="Github issues" src="https://img.shields.io/github/issues/Padosi-Oneworld/Padosi_backend?color=56BEB8" /> 
-
-  <img alt="Github forks" src="https://img.shields.io/github/forks/Padosi-Oneworld/Padosi_backend?color=56BEB8" /> 
-
-  <img alt="Github stars" src="https://img.shields.io/github/stars/Padosi-Oneworld/Padosi_backendd?color=56BEB8" /> 
-</p>
 
 <!-- Status -->
 
