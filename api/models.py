@@ -1,3 +1,4 @@
+from argparse import ONE_OR_MORE
 import datetime
 from email.mime import base
 from sqlalchemy.orm import relationship
@@ -49,6 +50,7 @@ class User(UserProfile):
     is_active: bool = Column(Boolean)
     is_delete: bool = Column(Boolean)
 
+
 class Address(Base):
     __tablename__ = 'address'
 
@@ -72,3 +74,40 @@ class Following(Base):
 
     user: relationship('User', back_populates='following')
     following: relationship('User', back_populates='followers')
+
+
+class Post(Base):
+    __tablename__ = 'posts'
+
+    message: String = Column(String)
+    number_of_likes: int = Column(int)
+    location: String = Column(String)
+    post_image: String = Column(String)
+    post_type: Enum = Column(Enum) # image, video, text, audio
+    comments: relationship(ONE_OR_MORE)
+    user_profile: relationship('UserProfile', back_populates='post')
+    post_reports: relationship('PostReport', back_populates='post')
+
+
+class PostLikes(Base):
+    __tablename__ = 'post_likes'
+
+    liked_by: Column(ForeignKey('users.id'), primary_key=True)
+    post: Column(ForeignKey('posts.id'), primary_key=True)
+    liked_at: DateTime = Column(DateTime, default=datetime.now)
+
+
+class PostComments(Base):
+    __tablename__ = 'post_comments'
+
+    commented_by: Column(ForeignKey('users.id'), primary_key=True)
+    post: Column(ForeignKey('posts.id'), primary_key=True)
+
+
+class CommentLikes(Base):
+    __tablename__ = 'comment_likes'
+
+    liked_by: Column(ForeignKey('users.id'), primary_key=True)
+    comment: Column(ForeignKey('post_comments.id'), primary_key=True)
+
+
