@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from utils.dbUtil import database
+from auth import router as auth_router
 
 app = FastAPI(
     docs_url="/docs",
@@ -11,16 +12,17 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-@app.on_event("startup")
+@app.on_event("startup")  # datbase connection
 async def startup():
     await database.connect()
 
 
-@app.on_event("shutdown")
+@app.on_event("shutdown")  # database disconnect
 async def shutdown():
     await database.disconnect()
 
+app.include_router(auth_router.router, tags=["Auth"]) # router.post("/auth/register", ...)
 
-@app.get('/')
-def hello_world():
-    return {'message': 'Hello World'}
+#@app.get('/')
+#def hello_world():
+#   return {'message': 'Hello World'}
