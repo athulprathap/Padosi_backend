@@ -49,16 +49,13 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) , 
 $ git clone https://github.com/{{YOUR_GITHUB_USERNAME}}/padosi-backend
 
 # Access
-$ cd padosi-backend
+$ cd padosi-backend/api
 
 # Install dependencies
 $ pip install -r requirements.txt
 
-# build the project --build
-$ sudo docker compose up --build
-
 # Run the project
-$ sudo docker-compose up 
+$ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 # The server will initialize in the <http://localhost:8000>
 ```
