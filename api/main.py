@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from utils.dbUtil import database
 
 app = FastAPI(
     docs_url="/docs",
@@ -9,6 +10,15 @@ app = FastAPI(
     version="1.0",
     openapi_url="/openapi.json",
 )
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
 
 
 @app.get('/')
