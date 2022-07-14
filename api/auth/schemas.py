@@ -7,8 +7,10 @@ class UserList(BaseModel):
     fullname: str
 
 
-class UserCreate(UserList): # this class uses base model to define the fields
-    password: str # password is a required field
+class UserCreate(BaseModel):
+    email: str = Field(..., example="sjdecode@gmail.com")
+    password: str = Field(..., example="sjdecode")
+    fullname: str = Field(..., example="Neng Channa")
 
 class UserPassword(BaseModel):
     password: str

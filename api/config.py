@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DB_DATABASE: str
 
     class Config:
-        env_file = '.env'
+        env_file = 'api/.env'
         env_file_encoding = 'utf-8'
 
 

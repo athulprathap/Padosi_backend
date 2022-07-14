@@ -1,6 +1,6 @@
 import jwt
 from datetime import datetime, timedelta
-from utils import constantUtil
+from api.utils import constantUtil
 
 
 async def create_accces_token(*, data: dict, expires_delta: timedelta = None):  # access

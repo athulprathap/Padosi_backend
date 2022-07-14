@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from utils.dbUtil import database
-from auth import router as auth_router
+from api.utils.dbUtil import database, engine, metadata
+from api.auth import router as auth_router
 
 app = FastAPI(
     docs_url="/docs",

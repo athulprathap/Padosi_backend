@@ -2,9 +2,9 @@ from os import access
 from sys import prefix
 from urllib import response
 from fastapi import APIRouter, Depends, HTTPException, status
-from auth import schemas
-from auth import crud
-from utils import cryptoUtil, constantUtil, jwtUtil
+from api.auth import schemas
+from api.auth import crud
+from api.utils import cryptoUtil, constantUtil, jwtUtil
 from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(
@@ -14,7 +14,7 @@ router = APIRouter(
 
 # register router for /api/v1/auth/register
 
-@router.post("/auth/register", response_model=schemas.UserList)  
+@router.post("/auth/register")  
 async def register(user: schemas.UserCreate):
 
     # check user exist

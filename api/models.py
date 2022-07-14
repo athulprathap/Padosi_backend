@@ -8,6 +8,24 @@ from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Table, Flo
 
 metadata = MetaData()
 
+users = Table(
+    'my_users', metadata,
+    Column('id', Integer, Sequence('user_id_seq'), primary_key=True),
+    Column('email', String(100)),
+    Column('password', String(100)),
+    Column('fullname', String(50)),
+    Column('created_on', DateTime),
+    Column('status', String(1)),
+)
+
+base = Table(
+    'base', metadata,
+    Column('is_deleted', Boolean),
+    Column('created_on', DateTime(), default=func.now()),
+    Column('updated_on', DateTime(), default=func.now(), onupdate=func.now()),
+    Column('created_by', String(50)),
+    Column('updated_by', String(50)),
+)
 
 class Base():
     __tablename__ = 'base', metadata , 
@@ -49,6 +67,7 @@ class User(UserProfile):
     id: Integer = Column(Integer, primary_key=True)
     username: String = Column(String)
     password: String = Column(String)
+    email: String = Column(String)
     is_admin: bool = Column(Boolean)
     is_active: bool = Column(Boolean)
     is_delete: bool = Column(Boolean)

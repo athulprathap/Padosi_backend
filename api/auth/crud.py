@@ -1,5 +1,5 @@
-from utils.dbUtil import database
-from auth import schemas
+from api.utils.dbUtil import database
+from api.auth import schemas
 
 def find_existed_user(email: str):
     query = "select * from my_users where email=:email and status='1'"
