@@ -68,7 +68,7 @@ $ sudo docker-compose up
 This project is under license from MIT. For more details, see the [LICENSE](LICENSE.md) file.
 
 
-Made with :heart: by <a href="https://github.com/{{Padosi-Oneworld}}" target="_blank">Padosi-Oneworld</a>
+Made with :heart: by <a href="https://github.com/Padosi-Oneworld" target="_blank">Padosi-Oneworld</a>
 
 &#xa0;
 

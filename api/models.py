@@ -27,6 +27,14 @@ base = Table(
     Column('updated_by', String(50)),
 )
 
+codes = Table(
+    'codes', metadata,
+    Column('id', Integer, Sequence('code_id_seq'), primary_key=True),
+    Column('email', String(100)),
+    Column('reset_code', String(50)),
+    Column('expired_in', DateTime),
+    Column('status', String(1))
+    )
 class Base():
     __tablename__ = 'base', metadata , 
 
