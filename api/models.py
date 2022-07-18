@@ -34,7 +34,8 @@ codes = Table(
     Column('reset_code', String(50)),
     Column('expired_in', DateTime),
     Column('status', String(1))
-    )
+)
+
 class Base():
     __tablename__ = 'base', metadata , 
 

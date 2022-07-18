@@ -1,13 +1,8 @@
-from email import message
-from os import access
-from sys import prefix
-from urllib import response
-from fastapi import APIRouter, Depends, HTTPException, status
-from api.auth import schemas
-from api.auth import crud
-from api.utils import cryptoUtil, constantUtil, jwtUtil, emailUtil
-from fastapi.security import OAuth2PasswordRequestForm
 import uuid
+from api.auth import crud, schemas
+from api.utils import constantUtil, cryptoUtil, emailUtil, jwtUtil
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(
     prefix = "/api/v1"
@@ -95,13 +90,35 @@ async def forgot_password(request: schemas.ForgotPassword):
     </body>
     </html>
     """.format(request.email, reset_code)
-
     await emailUtil.send_email(subject, recipient, message)
 
     return {
         "reset_code": reset_code,
         "code": 200,
         "message": "We have sent an email to {0:} with a link to reset your password".format(request.email)
-
-
     }
+
+@router.patch("/auth/reset-password")
+async def reset_password(reset_password_token: str, request: schemas.ResetPassword):
+    # check valid reset code
+    reset_token = await crud.check_reset_password_token(reset_password_token)
+    if not reset_token:
+        raise HTTPException(status_code=404, detail="Reset password token has expired, please request a new one")
+    
+    # check both new and confirm password match
+    if request.new_password != request.confirm_password:
+        raise HTTPException(status_code=404, detail="New password and confirm password do not match")
+    
+    # Reset new password
+    forgot_password_object = schemas.ForgotPassword(**reset_token)
+    new_hashed_password = cryptoUtil.get_password_hash(request.new_password)
+    await crud.reset_password(new_hashed_password,forgot_password_object.email)
+
+    # Disable reset code
+    await crud.disable_reset_code(reset_password_token, forgot_password_object.email)
+
+    return {
+        "code": 200,
+        "message": "Password has been reset"
+    }
+
