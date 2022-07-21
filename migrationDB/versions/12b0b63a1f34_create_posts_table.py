@@ -1,8 +1,8 @@
-"""empty message
+"""create posts table
 
-Revision ID: a6fdf48f9022
+Revision ID: 12b0b63a1f34
 Revises: 
-Create Date: 2022-07-18 17:58:34.315947
+Create Date: 2022-07-21 15:36:34.854495
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a6fdf48f9022'
+revision = '12b0b63a1f34'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,3 +24,4 @@ def upgrade():
 def downgrade():
     op.drop_table('posts')
     pass
+
