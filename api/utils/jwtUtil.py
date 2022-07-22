@@ -37,6 +37,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         username: str = payload.get("sub")
         if not username:
             raise credentials_exception
+
+        # check blacklist token
+        black_list_token = await crud.find_black_list_token(token)
+        if black_list_token:
+            raise credentials_exception
         
         # check if user exists
         result = await crud.find_existed_user(username)
@@ -56,3 +61,5 @@ def get_current_active_user(current_user: schemas.UserList = Depends(get_current
     
     return current_user
 
+def get_token_user(token: str = Depends(oauth2_scheme)):
+    return token

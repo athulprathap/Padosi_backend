@@ -24,3 +24,7 @@ def reset_password(reset_password_token: str, email: str):
 def disable_reset_code(reset_password_token: str, email: str):
     query = "update codes set status = '0' where reset_code = :reset_password_token and email = :email"
     return database.execute(query, values={"reset_password_token": reset_password_token, "email": email})
+
+def find_black_list_token(token: str):
+    query = "select * from blacklist where token = :token"
+    return database.fetch_one(query, values={"token": token})
