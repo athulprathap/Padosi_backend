@@ -9,6 +9,7 @@ services:
       - 8000:80
     volumes: 
       - ./api:/api
+      - ./upload-images/:/upload-images/user/
 
   db:
     image: postgres:13-alpine

@@ -45,7 +45,9 @@ async def send_otp(
         await emailUtil.send_email(subject, recipient, message)
 
     else:
-        print("OTP via phone number")
+        # send otp to phone number
+        msg = "Your OTP code is: " + otp_code
+        await otpUtil.OTP_send(msg, request.recipient_id)
 
     return {
         "session_id": session_id,

@@ -16,3 +16,4 @@ fastapi-mail
 Pillow
 python-dotenv
 alembic
+twilio
