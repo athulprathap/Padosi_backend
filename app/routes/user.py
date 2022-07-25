@@ -1,16 +1,25 @@
-from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
+from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter, File, UploadFile
 from sqlalchemy.orm import Session
-from database import  get_db
-import models, schema, utils, oauth2
+from ..database import  get_db
+from .. import models, schema, utils, oauth2
 
 
 router = APIRouter( tags = ['Users'])
 
 @router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=schema.UserOpt)
-async def create(users: schema.CreateUser, db:Session = Depends(get_db)):
+async def create(users: schema.CreateUser, file: UploadFile = File(description="uploadFile"), db:Session = Depends(get_db)):
 
     hashed_password = utils.hash(users.password)
     users.password = hashed_password
+    
+    try:
+        contents = await file.read()
+        with open(file.filename, 'wb') as f:
+            f.write(contents)
+    except Exception:
+        return {"message": "There was an error uploading the file"}
+    finally:
+        await file.close()
 
     newUser = models.User(**users.dict())
     db.add(newUser)

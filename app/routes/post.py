@@ -2,8 +2,8 @@ from typing import  List, Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-import models, schema, oauth2
-from database import  get_db
+from .. import models, schema, oauth2
+from ..database import  get_db
 
 router = APIRouter(tags = ['Posts'])
 

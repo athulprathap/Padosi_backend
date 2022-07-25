@@ -40,6 +40,7 @@ class UserBase(BaseModel):
     username: str 
     email: str
     password: str
+    image: str
     created_at = datetime 
 
 class CreateUser(UserBase):
