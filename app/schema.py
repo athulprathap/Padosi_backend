@@ -39,7 +39,7 @@ class PostAll(BaseModel):
 class UserBase(BaseModel):
     username: str 
     email: str
-    password: Optional[str]
+    password: str
     # image: str
     created_at = datetime 
 

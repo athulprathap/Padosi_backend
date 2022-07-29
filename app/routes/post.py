@@ -2,7 +2,8 @@ from typing import  List, Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from .. import models, schema, oauth2
+from .. import schema, oauth2
+from ..models.post import get_owner_post
 from  ..database import get_db
 
 
@@ -11,9 +12,9 @@ router = APIRouter(tags = ['Posts'])
 # Get post Created only by owner
 @router.get("/ownerPost", response_model=List[schema.PostOpt])
 async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-
-    owner_post = db.query(models.Post).filter(models.Post.user_id == account_owner.id).all()
+    owner_post = get_owner_post(db, account_owner)
     return   owner_post
+
 
 # Get all Post
 @router.get("/allPosts", response_model=List[schema.PostAll])

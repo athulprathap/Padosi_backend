@@ -26,3 +26,4 @@ def create(request: schema.CreateUser, db: Session(get_db)):
     db.refresh(newUser)
 
     return newUser
+
