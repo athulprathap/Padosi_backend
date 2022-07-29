@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from . import models
-from .database import engine
-from .routes import post, user, auth
+from .models import user
+from .database import engine, Base
+from .routes import user, auth, post
 from .config import settings
 
 
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
  

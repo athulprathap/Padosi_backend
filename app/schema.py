@@ -14,7 +14,7 @@ class PostBase(BaseModel):
 class CreatePost(PostBase): 
     pass
 class UserOpt(BaseModel):  #(this only returns listed fields for User)
-    # id: int
+    id: int
     username: str
     email: EmailStr
     created_at = datetime 
@@ -39,7 +39,7 @@ class PostAll(BaseModel):
 class UserBase(BaseModel):
     username: str 
     email: str
-    password: str
+    password: Optional[str]
     # image: str
     created_at = datetime 
 
