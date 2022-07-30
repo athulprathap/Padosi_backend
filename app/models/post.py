@@ -26,13 +26,11 @@ class Like(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
 
 
-# # Get post Created only by owner
 # async def get_owner_post(db: Session, account_owner: int = Depends(oauth2.get_current_user)):
-#     owner_post = db.query(models.Post).filter(models.Post.user_id == account_owner.id).all()
+#     owner_post = db.query(Post).filter(Post.user_id == account_owner.id).all()
 #     return   owner_post
 
 
-# Create a Post
 def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oauth2.get_current_user)):
 # "user_id = current_user.id" identifies the owner of a post created by its id....
     newPost = Post(user_id = account_owner.id, **post.dict())  
@@ -43,15 +41,15 @@ def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oau
     return newPost
 
 
-# Get all Post
 def allPost(db: Session = Depends(get_db), limit:int = 6, skip:int = 0, option: Optional[str] = "",
                                              account_owner: int = Depends(oauth2.get_current_user)):
-    # allPost = db.query(models.Post).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
+    # allPost = db.query(Post).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
     # join tables and get the results
     allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
             isouter=True).group_by(Post.id).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
         
     return allPost 
+
 
 def like_unlike(like: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
     
@@ -74,6 +72,18 @@ def like_unlike(like: schema.Likes, db: Session = Depends(get_db), account_owner
         db.commit()
         
         return {"msg": "You unliked this post"}
-   
+
+# # Get a Post
+def singlePost(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+
+    # singlePost = db.query(Post).filter(Post.id == id).first()
+    
+    single_post = db.query(Post, func.count(Like.post_id).label("likes")).join(Like,
+                 Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.id == id).first()
+
+    if not single_post:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
+
+    return single_post
     
     

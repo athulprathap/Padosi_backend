@@ -2,7 +2,7 @@ from typing import  List, Optional
 from fastapi import FastAPI, Response,requests, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from .. import schema, oauth2
-from ..models.post import  create , allPost, like_unlike
+from ..models.post import  create, allPost, singlePost, like_unlike
 from  ..database import get_db
 
 
@@ -21,28 +21,21 @@ async def get_allPost(db: Session = Depends(get_db)):
     
 # Create a Post
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
-async def createPost(post:schema.CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-    return create(post, db, account_owner)
+async def createPost(request:schema.CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+    return create(request, db, account_owner)
 
 
 # # Like & Unlike Post
 @router.post("/like", status_code= status.HTTP_201_CREATED)
-async def like_post(like: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-        return like_unlike(like, db, account_owner)
-    
+async def like_post(request: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+    return like_unlike(request, db, account_owner)
+
     
 # # Get a Post
-# @router.get("/getOne/{id}",  response_model=schema.PostOpt)
-# async def get_post(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+@router.get("/getOne/{id}")
+async def get_post(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+    return singlePost(id, db, account_owner)
 
-#     # singlePost = db.query(models.Post).filter(models.Post.id == id).first()
-    
-#     singlePost = db.query(models.Post, func.count(models.Like.post_id).label("likes")).join(models.Like, models.Like.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id).first()
-
-#     if not singlePost:
-#         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
-
-#     return singlePost
 
 # # Delete a Post
 # @router.delete("/delete/{id}", status_code = status.HTTP_204_NO_CONTENT)
