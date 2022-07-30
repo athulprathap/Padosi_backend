@@ -1,32 +1,23 @@
 from typing import  List, Optional
 from fastapi import FastAPI, Response,requests, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from .. import schema, oauth2
-from ..models.post import get_owner_post, create
+from ..models.post import  create , allPost, like_unlike
 from  ..database import get_db
 
 
 router = APIRouter(tags = ['Posts'])
 
-# Get post Created only by owner
-@router.get("/ownerPost", response_model=List[schema.PostOpt])
-async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-    owner_post = get_owner_post(db, account_owner)
-    return   owner_post
-
+# # Get post Created only by owner
+# @router.get("/ownerPost", response_model=List[schema.PostOpt])
+# async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+#     owner_post = get_owner_post(db, account_owner)
+#     return  owner_post
 
 # Get all Post
-# @router.get("/allPosts", response_model=List[schema.PostAll])
-# async def get_allPost(db: Session = Depends(get_db), limit:int = 6, skip:int = 0, option: Optional[str] = "", account_owner: int = Depends(oauth2.get_current_user)):
-    
-#     # allPost = db.query(models.Post).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
-    
-#     # join tables and get the results
-#     allPost  = db.query(models.Post, func.count(models.Like.post_id).label("likes")).join(models.Like, models.Like.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
-        
-    
-#     return allPost 
+@router.get("/allPosts", response_model=List[schema.PostAll])
+async def get_allPost(db: Session = Depends(get_db)):
+    return allPost(db)
     
 # Create a Post
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
@@ -35,28 +26,9 @@ async def createPost(post:schema.CreatePost, db: Session = Depends(get_db), acco
 
 
 # # Like & Unlike Post
-# @router.post("/like", status_code= status.HTTP_201_CREATED)
-# async def like_post(like: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-    
-#     query_like = db.query(models.Like).filter(models.Like.post_id == like.post_id, models.Like.user_id == account_owner.id)
-    
-#     isLiked = query_like.first()
-    
-#     if (like.dir == 1):
-#         if isLiked:
-#             raise HTTPException(status_code= status.HTTP_409_CONFLICT, detail= f"You have already liked this post!")
-#         newLike = models.Like(post_id = like.post_id, user_id = account_owner.id)
-#         db.add(newLike)
-#         db.commit()
-#         return {"msg": "You Liked this Post!"}
-#     else: 
-#         if not isLiked:
-#             raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail= f"Like not found!")
-         
-#         query_like.delete()
-#         db.commit()
-        
-#         return {"msg": "You unliked this post"}
+@router.post("/like", status_code= status.HTTP_201_CREATED)
+async def like_post(like: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+        return like_unlike(like, db, account_owner)
     
     
 # # Get a Post

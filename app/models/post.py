@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from typing import  List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from .. import  oauth2
 from ..import schema, utils
@@ -25,15 +26,14 @@ class Like(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
 
 
-# Get post Created only by owner
-async def get_owner_post(db: Session, account_owner: int = Depends(oauth2.get_current_user)):
-    owner_post = db.query(models.Post).filter(models.Post.user_id == account_owner.id).all()
-    return   owner_post
+# # Get post Created only by owner
+# async def get_owner_post(db: Session, account_owner: int = Depends(oauth2.get_current_user)):
+#     owner_post = db.query(models.Post).filter(models.Post.user_id == account_owner.id).all()
+#     return   owner_post
 
 
 # Create a Post
 def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oauth2.get_current_user)):
-
 # "user_id = current_user.id" identifies the owner of a post created by its id....
     newPost = Post(user_id = account_owner.id, **post.dict())  
     db.add(newPost)
@@ -44,12 +44,36 @@ def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oau
 
 
 # Get all Post
-async def get_allPost(db: Session = Depends(get_db), limit:int = 6, skip:int = 0, option: Optional[str] = "", account_owner: int = Depends(oauth2.get_current_user)):
-    
+def allPost(db: Session = Depends(get_db), limit:int = 6, skip:int = 0, option: Optional[str] = "",
+                                             account_owner: int = Depends(oauth2.get_current_user)):
     # allPost = db.query(models.Post).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
-    
     # join tables and get the results
-    allPost  = db.query(models.Post, func.count(models.Like.post_id).label("likes")).join(models.Like, models.Like.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(option)).limit(limit).offset(skip).all()
+    allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
+            isouter=True).group_by(Post.id).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
         
-    
     return allPost 
+
+def like_unlike(like: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+    
+    query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == account_owner.id)
+    
+    isLiked = query_like.first()
+    
+    if (like.dir == 1):
+        if isLiked:
+            raise HTTPException(status_code= status.HTTP_409_CONFLICT, detail= f"You have already liked this post!")
+        newLike = Like(post_id = like.post_id, user_id = account_owner.id)
+        db.add(newLike)
+        db.commit()
+        return {"msg": "You Liked this Post!"}
+    else: 
+        if not isLiked:
+            raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail= f"Like not found!")
+         
+        query_like.delete()
+        db.commit()
+        
+        return {"msg": "You unliked this post"}
+   
+    
+    
