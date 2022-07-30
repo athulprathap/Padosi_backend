@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-from ..database import get_db, Base
+from ..database import  Base
 from ..import schema, utils
 
 
@@ -16,7 +16,7 @@ class User(Base):
     # image = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     
-def create(request: schema.CreateUser, db: Session(get_db)):
+def create(request: schema.CreateUser, db: Session):
     hashed_password = utils.hash(request.password)
     request.password = hashed_password
     
