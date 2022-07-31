@@ -69,6 +69,7 @@ This project is under license from MIT. For more details, see the [LICENSE](LICE
 
 
 Made with :heart: by <a href="https://github.com/Padosi-Oneworld" target="_blank">Padosi-Oneworld</a>
+Check these for [Documentation](https://docs.google.com/document/d/1-XQYOlbrP3GcSDzu9TqORbRniwVQiavXH8-hT_EUt2A/edit?usp=sharing)
 
 &#xa0;
 

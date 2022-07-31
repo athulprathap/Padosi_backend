@@ -4,9 +4,12 @@ import datetime
 from email.mime import base
 from email.policy import default
 from enum import unique
+from sqlite3 import Timestamp
+from typing import Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Table, Float, Enum, Numeric, MetaData, Integer, Sequence
+from uuid import UUID
 
 metadata = MetaData()
 
@@ -62,6 +65,17 @@ otpBlocks = Table(
     Column('id', Integer, Sequence('otp_block_id_seq'), primary_key=True),
     Column('recipient_id', String(100)),
     Column('created_on', DateTime),
+)
+
+
+post = Table(
+    "post", metadata,
+    Column("id", Integer, Sequence("post_id_seq"), primary_key=True),
+    Column("title", String(100)),
+    Column("content", String(1000)),
+    Column("published", Boolean),
+    Column("owner_id", Integer, ForeignKey("my_users.id"), nullable=False),
+    Column("created_at", DateTime, default=func.now())
 )
 
 class Base():
@@ -133,6 +147,7 @@ class Following(Base):
     following: relationship('User', back_populates='followers')
 
 
+"""
 class Post(Base):
     __tablename__ = 'posts', metadata ,
 
@@ -144,7 +159,7 @@ class Post(Base):
     comments: relationship(ONE_OR_MORE)
     user_profile: relationship('UserProfile', back_populates='post')
     post_reports: relationship('PostReport', back_populates='post')
-
+"""
 
 class PostLikes(Base):
     __tablename__ = 'post_likes', metadata,

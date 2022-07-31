@@ -3,6 +3,7 @@ from api.utils.dbUtil import database, engine, metadata
 from api.users import router as user_router
 from api.auth import router as auth_router
 from api.otps import router as otp_router
+from api.posts import router as post_router
 
 app = FastAPI(
     docs_url="/docs",
@@ -26,6 +27,7 @@ async def shutdown():
 app.include_router(auth_router.router, tags=["Auth"]) # router.post("/auth/register", ...)
 app.include_router(user_router.router, tags=["Users"]) # router.post("/user/register", ...)
 app.include_router(otp_router.router, tags=["OTPs"]) # router.post("/user/login", ...)
+app.include_router(post_router.router, tags=["Posts"]) # router.post("/post/newpost", ...)
 
 
 

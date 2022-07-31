@@ -19,3 +19,7 @@ def deactivate_user(current_user: auth_schemas.UserList):
 def save_black_list(token: str, current_user: auth_schemas.UserList):
     query = "INSERT INTO blacklist (token, email) VALUES (:token, :email)"
     return database.execute(query, values= {"token": token, "email": current_user.email})
+
+def get_user_by_id(user_id: str):
+    query = "SELECT * FROM my_users WHERE id=:id"
+    return database.get_one(query, values= {"id": user_id})
