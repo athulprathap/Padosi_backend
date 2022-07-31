@@ -26,9 +26,10 @@ class Like(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
 
 
-# async def get_owner_post(db: Session, account_owner: int = Depends(oauth2.get_current_user)):
-#     owner_post = db.query(Post).filter(Post.user_id == account_owner.id).all()
-#     return   owner_post
+
+def personal_post(db: Session, account_owner: int = Depends(oauth2.get_current_user)):
+    owner_post = db.query(Post).filter(Post.user_id == account_owner.id).all()
+    return   owner_post
 
 
 def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oauth2.get_current_user)):
@@ -73,11 +74,9 @@ def like_unlike(like: schema.Likes, db: Session = Depends(get_db), account_owner
         
         return {"msg": "You unliked this post"}
 
-# # Get a Post
-def singlePost(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
 
+def singlePost(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
     # singlePost = db.query(Post).filter(Post.id == id).first()
-    
     single_post = db.query(Post, func.count(Like.post_id).label("likes")).join(Like,
                  Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.id == id).first()
 
@@ -87,3 +86,39 @@ def singlePost(id:int, db:Session = Depends(get_db), account_owner: int = Depend
     return single_post
     
     
+# Delete a Post
+def delete(id: int, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+
+    deleted_post = db.query(Post).filter(Post.id == id)
+    
+    post = deleted_post.first()
+ 
+    if not post:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"post id:{id} does not exist!")
+
+    elif post.user_id != account_owner.id:
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail=f"You can't perform this action!")
+
+    deleted_post.delete()
+    db.commit()
+    
+    return Response(status_code = status.HTTP_204_NO_CONTENT)
+
+
+# Edit/Update a Post
+def update(id:int, update_post:schema.CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+
+    editedPost = db.query(Post).filter(Post.id == id)
+    
+    post =  editedPost.first()
+
+    if not post:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, datail=f"post with id:{id} does not exist!")
+    
+    elif post.user_id != account_owner.id:
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail = f"You can't perform this action!")
+
+    editedPost.update(update_post.dict())
+    db.commit()
+
+    return  editedPost.first()
