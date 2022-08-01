@@ -29,7 +29,7 @@ class Like(Base):
 
 def personal_post(db: Session, account_owner: int = Depends(oauth2.get_current_user)):
     owner_post = db.query(Post).filter(Post.user_id == account_owner.id).all()
-    return   owner_post
+    return  owner_post
 
 
 def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oauth2.get_current_user)):
@@ -42,7 +42,7 @@ def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oau
     return newPost
 
 
-def allPost(db: Session = Depends(get_db), limit:int = 6, skip:int = 0, option: Optional[str] = "",
+def allPost(db: Session = Depends(get_db), limit:int = 4, skip:int = 0, option: Optional[str] = "",
                                              account_owner: int = Depends(oauth2.get_current_user)):
     # allPost = db.query(Post).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
     # join tables and get the results

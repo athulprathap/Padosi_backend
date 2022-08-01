@@ -10,7 +10,7 @@ router = APIRouter(tags = ['Posts'])
 
 
 # Get post Created only by owner
-@router.get("/ownerPost", response_model=List[schema.PostOpt])
+@router.get("/ownerPost")
 async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
     return  personal_post(db, account_owner)
 
@@ -19,6 +19,7 @@ async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Dep
 @router.get("/allPosts", response_model=List[schema.PostAll])
 async def get_allPost(db: Session = Depends(get_db)):
     return allPost(db)
+    
     
 # Create a Post
 @router.post("/create", status_code=status.HTTP_201_CREATED,  response_model=schema.PostOpt)
