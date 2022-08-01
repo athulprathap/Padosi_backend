@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade():
     op.create_table('posts',  sa.Column('id', sa.Integer(), nullable=False, 
-                                        primary_key=True), sa.Column('title', sa.String(), nullable=False))
+                        zprimary_key=True), sa.Column('title', sa.String(), nullable=False))
     pass
 
 

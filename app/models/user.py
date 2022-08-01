@@ -1,9 +1,10 @@
+from fastapi import FastAPI, Depends
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-from ..database import  Base
+from ..database import  Base , get_db
 from ..import schema, utils
 
 
@@ -27,3 +28,12 @@ def create(request: schema.CreateUser, db: Session):
 
     return newUser
 
+
+def singleUser(id:int, db: Session = Depends(get_db)):
+    
+    single_user = db.query(User).filter(User.id == id).first()
+
+    if not single_user:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
+
+    return single_user

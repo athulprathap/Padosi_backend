@@ -6,8 +6,8 @@ from typing import  List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-from .. import  oauth2
-from ..import schema, utils
+from ..import schema, utils, oauth2
+from ..models import user
 from ..database import get_db, Base
 
 class Post(Base):
@@ -44,7 +44,6 @@ def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oau
 
 def allPost(db: Session = Depends(get_db), limit:int = 4, skip:int = 0, option: Optional[str] = "",
                                              account_owner: int = Depends(oauth2.get_current_user)):
-    # allPost = db.query(Post).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
     # join tables and get the results
     allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
             isouter=True).group_by(Post.id).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
@@ -76,7 +75,6 @@ def like_unlike(like: schema.Likes, db: Session = Depends(get_db), account_owner
 
 
 def singlePost(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-    # singlePost = db.query(Post).filter(Post.id == id).first()
     single_post = db.query(Post, func.count(Like.post_id).label("likes")).join(Like,
                  Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.id == id).first()
 

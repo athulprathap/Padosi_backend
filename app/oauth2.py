@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from . import schema
-from .models.user import User
+from . models.user import User
 from .database import get_db
 from .config import settings
 
