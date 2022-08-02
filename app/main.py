@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from .models import user, post
 from .database import engine, Base
-from .routes import user, auth, post
+from .routes import user,post,auth
 from .config import settings
 
 
