@@ -17,7 +17,7 @@ class CreateUser(User):
      pass
  
 
-class UserOpt(User):  #(this only returns listed fields for User)
+class UserOpt(BaseModel):  #(this only returns listed fields for User)
     id: int
     username: str
     email: EmailStr
