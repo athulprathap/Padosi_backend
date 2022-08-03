@@ -27,11 +27,11 @@ def create_user(user: CreateUser, db: Session,):
     return newUser
 
 
-def singleUser(db: Session, id: int=0):
+def singleUser(db: Session, id: int):
     
-    single_user = db.query(User).filter(User.id == id).first()
-    
-    return single_user
+    query_user =  db.query(User).filter(User.id == id).first()
+  
+    return query_user
 
 
 def update_user(db: Session, id: int=0, values: Dict={}):
