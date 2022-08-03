@@ -5,6 +5,7 @@ from ...pydantic_schemas.user import User
 from ...import utils
 from ...import oauth2
 from ...database import get_db
+from typing import Dict
 
 
 def register_new(user: User, db: Session):
@@ -19,5 +20,5 @@ def single_user(id: int, db: Session):
     return singleUser(db, id)
  
 
-def updateUser(user: User, id:int, db: Session):
-    update_user(db)
+def updateUser(id:int, user:User, db: Session, values: Dict={}):
+    return update_user(db=db, user=user, id=id, values=values)

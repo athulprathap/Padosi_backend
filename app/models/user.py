@@ -34,10 +34,11 @@ def singleUser(db: Session, id: int):
     return query_user
 
 
-def update_user(db: Session, id: int=0, values: Dict={}):
+def update_user(db: Session,  user: User, id: int, values: Dict={}):
     
     updated = db.query(User).filter(User.id == id)
+    
     updated.update(values)
     db.commit()
     
-    return updated
+    return updated.first()
