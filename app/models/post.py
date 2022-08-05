@@ -6,8 +6,9 @@ from typing import  List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-from ..import schema, utils, oauth2
-from ..models import user
+from ..import oauth2
+from ..pydantic_schemas.posts import Post, CreatePost, Likes, PostOpt
+from ..models.user import User
 from ..database import get_db, Base
 
 class Post(Base):
@@ -27,18 +28,27 @@ class Like(Base):
 
 
 
-def personal_post(db: Session, account_owner: int = Depends(oauth2.get_current_user)):
-    owner_post = db.query(Post).filter(Post.user_id == account_owner.id).all()
+def personal_post(db: Session, user_id: int = 0):
+    owner_post = db.query(Post).filter(Post.user_id == user_id).all()
     return  owner_post
 
 
-def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oauth2.get_current_user)):
-# "user_id = current_user.id" identifies the owner of a post created by its id....
-    newPost = Post(user_id = account_owner.id, **post.dict())  
+# def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oauth2.get_current_user)):
+# # "user_id = current_user.id" identifies the owner of a post created by its id....
+#     newPost = Post(user_id = account_owner.id, **post.dict())  
+#     db.add(newPost)
+#     db.commit()
+#     db.refresh(newPost)
+
+#     return newPost
+
+def create(post:Post, db: Session, user: str):
+    newPost = Post( title=post.title, content=post.content, published=post.published, user=user)
+    
     db.add(newPost)
     db.commit()
     db.refresh(newPost)
-
+    
     return newPost
 
 
@@ -51,7 +61,7 @@ def allPost(db: Session = Depends(get_db), limit:int = 4, skip:int = 0, option: 
     return allPost 
 
 
-def like_unlike(like: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+def like_unlike(like: Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
     
     query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == account_owner.id)
     
@@ -83,7 +93,7 @@ def singlePost(id:int, db:Session = Depends(get_db), account_owner: int = Depend
 
     return single_post
     
-    
+
 # Delete a Post
 def delete(id: int, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
 
@@ -104,7 +114,7 @@ def delete(id: int, db: Session = Depends(get_db), account_owner: int = Depends(
 
 
 # Edit/Update a Post
-def update(id:int, update_post:schema.CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+def update(id:int, update_post:CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
 
     editedPost = db.query(Post).filter(Post.id == id)
     

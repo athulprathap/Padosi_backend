@@ -2,7 +2,7 @@ from fastapi import FastAPI, Response, requests, status, HTTPException, Depends,
 from sqlalchemy.orm import Session
 from .. import oauth2
 from ..database import get_db
-from ..modules.auth.registration import register_new, singleUser, updateUser
+from ..modules.users.userRepository import register_new, singleUser, updateUser
 from ..pydantic_schemas.user import CreateUser, UserOpt,  User, UserUpdate
 
 

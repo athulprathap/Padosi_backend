@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Response, requests, status, HTTPException, Depends
-from ...models.user import create_user, singleUser, update_user
+from ...model import create_user, singleUser, update_user
 from sqlalchemy.orm import Session
 from ...pydantic_schemas.user import User
 from ...import utils

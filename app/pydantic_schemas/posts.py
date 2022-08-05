@@ -4,15 +4,17 @@ from typing import Optional
 from pydantic.types import conint
 from .user import UserOpt
 
+
+
 # Post models
-class PostBase(BaseModel):
+class Post(BaseModel):
     title: str
     content: str
     published: bool = True
     created_at = datetime
 
 #The "createPost" class will automatically inherit the "PostBase" proprties and populate every field
-class CreatePost(PostBase): 
+class CreatePost(Post): 
     pass
 
 class UserOpt(BaseModel):  #(this only returns listed fields for User)
@@ -23,7 +25,7 @@ class UserOpt(BaseModel):  #(this only returns listed fields for User)
     class Config:
         orm_mode = True
         
-class PostOpt(PostBase):  #(returns listed fields for Post)
+class PostOpt(Post):  #(returns listed fields for Post)
     id: int
     published: bool
     user_id : int
@@ -36,3 +38,7 @@ class PostAll(BaseModel):
     likes: int
     class Config:
         orm_mode = True
+
+class Likes(BaseModel):
+    post_id: int
+    dir: conint(le=1)
