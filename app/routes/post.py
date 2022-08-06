@@ -1,25 +1,25 @@
-from typing import  List, Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from ..pydantic_schemas.posts import Post, CreatePost, PostAll, PostOpt
+from ..modules.posts.postRepository import create_post, myPost, get_all_post, single_Post, updatePost
+from ..pydantic_schemas.posts import Post, PostAll, PostOpt, CreatePost
+from typing import  List
 from sqlalchemy.orm import Session
-from ..import oauth2
-from ..modules.posts.postRepository import create_post
 from  ..database import get_db
+from ..import oauth2
 
 
 router = APIRouter(tags = ['Posts'])
 
 
-# # Get post Created only by owner
-# @router.get("/ownerPost")
-# async def get_owner_post(db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-#     return  personal_post(db, account_owner)
+# Get post Created only by owner
+@router.get("/ownerPost", response_model=PostAll)
+async def get_owner_post(post:Post, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
+    return myPost(db=db, post=post, user=user)
 
 
-# # Get all Post
-# @router.get("/allPosts", response_model=List[schema.PostAll])
-# async def get_allPost(db: Session = Depends(get_db)):
-#     return allPost(db)
+# Get all Post
+@router.get("/allPosts", response_model=List[PostAll])
+async def get_allPost( db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
+    return get_all_post(db=db, user=user)
     
     
 # Create a Post
@@ -30,14 +30,14 @@ async def createPost(post:Post, db: Session = Depends(get_db), user:int= Depends
 
 # # # Like & Unlike Post
 # @router.post("/like", status_code= status.HTTP_201_CREATED)
-# async def like_post(request: schema.Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-#     return like_unlike(request, db, account_owner)
+# async def like_post(like: Like, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
+#     return reactions(db=db, like=like, user=user)
 
     
-# # # Get a Post
-# @router.get("/getOne/{id}")
-# async def get_singlepost(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-#     return singlePost(id, db, account_owner)
+# # Get a Post
+@router.get("/getOne/{id}")
+async def get_singlepost(id:int, db:Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
+    return single_Post(id=id, db=db)
 
 
 # # Delete a Post
@@ -46,7 +46,7 @@ async def createPost(post:Post, db: Session = Depends(get_db), user:int= Depends
 #     return delete(id, db, account_owner)
 
 
-# # Edit/Update a Post
-# @router.put("/edit/{id}",  response_model=schema.PostOpt)
-# async def editPost(id:int, update_post:schema.CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
-#     return update(id, update_post, db, account_owner)
+# Edit/Update a Post
+@router.put("/edit/{id}",  response_model=PostOpt)
+async def editPost(id:int, post:CreatePost, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
+    return updatePost(id=id, post=post, user=user, db=db, values=dict(post))

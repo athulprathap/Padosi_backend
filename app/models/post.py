@@ -2,7 +2,7 @@ from fastapi import FastAPI, Response, status, HTTPException, Depends
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
-from typing import  List, Optional
+from typing import  List, Optional, Dict
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -28,8 +28,8 @@ class Like(Base):
 
 
 
-def personal_post(db: Session, user_id: int = 0):
-    owner_post = db.query(Post).filter(Post.user_id == user_id).all()
+def personal_post(db: Session, user:str):
+    owner_post = db.query(Post).filter(Post.user_id == user).all()
     return  owner_post
 
 
@@ -52,8 +52,7 @@ def create(post:Post, db: Session, user: str):
     return newPost
 
 
-def allPost(db: Session = Depends(get_db), limit:int = 4, skip:int = 0, option: Optional[str] = "",
-                                             account_owner: int = Depends(oauth2.get_current_user)):
+def allPost(db: Session = Depends(get_db), limit:int = 4, skip:int = 0, option: Optional[str] = ""):
     # join tables and get the results
     allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
             isouter=True).group_by(Post.id).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
@@ -61,41 +60,47 @@ def allPost(db: Session = Depends(get_db), limit:int = 4, skip:int = 0, option: 
     return allPost 
 
 
-def like_unlike(like: Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+# def like_unlike(like: Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
     
-    query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == account_owner.id)
+#     query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == account_owner.id)
     
-    isLiked = query_like.first()
+#     isLiked = query_like.first()
     
-    if (like.dir == 1):
-        if isLiked:
-            raise HTTPException(status_code= status.HTTP_409_CONFLICT, detail= f"You have already liked this post!")
-        newLike = Like(post_id = like.post_id, user_id = account_owner.id)
-        db.add(newLike)
-        db.commit()
-        return {"msg": "You Liked this Post!"}
-    else: 
-        if not isLiked:
-            raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail= f"Like not found!")
+#     if (like.dir == 1):
+#         if isLiked:
+#             raise HTTPException(status_code= status.HTTP_409_CONFLICT, detail= f"You have already liked this post!")
+#         newLike = Like(post_id = like.post_id, user_id = account_owner.id)
+#         db.add(newLike)
+#         db.commit()
+#         return {"msg": "You Liked this Post!"}
+#     else: 
+#         if not isLiked:
+#             raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail= f"Like not found!")
          
-        query_like.delete()
-        db.commit()
+#         query_like.delete()
+#         db.commit()
         
-        return {"msg": "You unliked this post"}
+#         return {"msg": "You unliked this post"}
 
 
-def singlePost(id:int, db:Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+    
+# def like_unlike(like: Likes, db: Session = Depends(get_db), user:str=None):
+        
+#        query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == user.id)
+    
+#        return query_like.first()
+
+
+def singlePost(id:int, db:Session):
+    
     single_post = db.query(Post, func.count(Like.post_id).label("likes")).join(Like,
                  Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.id == id).first()
-
-    if not single_post:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
 
     return single_post
     
 
 # Delete a Post
-def delete(id: int, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+def delete(id: int, db: Session, values: Dict={}):
 
     deleted_post = db.query(Post).filter(Post.id == id)
     
@@ -114,19 +119,11 @@ def delete(id: int, db: Session = Depends(get_db), account_owner: int = Depends(
 
 
 # Edit/Update a Post
-def update(id:int, update_post:CreatePost, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
+def update(id:int, post:CreatePost, db: Session , values: Dict={}):
 
     editedPost = db.query(Post).filter(Post.id == id)
     
-    post =  editedPost.first()
-
-    if not post:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, datail=f"post with id:{id} does not exist!")
-    
-    elif post.user_id != account_owner.id:
-        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail = f"You can't perform this action!")
-
-    editedPost.update(update_post.dict())
+    editedPost.update(values)
     db.commit()
 
-    return  editedPost.first()
+    return editedPost.first()
