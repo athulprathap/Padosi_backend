@@ -28,19 +28,10 @@ class Like(Base):
 
 
 
-def personal_post(db: Session, user:str):
-    owner_post = db.query(Post).filter(Post.user_id == user).all()
+def personal_post(db: Session,  account_owner: int = Depends(oauth2.get_current_user)):
+    owner_post = db.query(Post).filter(Post.user_id == account_owner.id).all()
     return  owner_post
 
-
-# def create(post:schema.CreatePost, db: Session, account_owner: int = Depends(oauth2.get_current_user)):
-# # "user_id = current_user.id" identifies the owner of a post created by its id....
-#     newPost = Post(user_id = account_owner.id, **post.dict())  
-#     db.add(newPost)
-#     db.commit()
-#     db.refresh(newPost)
-
-#     return newPost
 
 def create(post:Post, db: Session, user: str):
     newPost = Post( title=post.title, content=post.content, published=post.published, user=user)
@@ -52,7 +43,7 @@ def create(post:Post, db: Session, user: str):
     return newPost
 
 
-def allPost(db: Session = Depends(get_db), limit:int = 4, skip:int = 0, option: Optional[str] = ""):
+def allPost(db: Session, limit:int = 4, skip:int = 0, option: Optional[str] = ""):
     # join tables and get the results
     allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
             isouter=True).group_by(Post.id).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
@@ -98,24 +89,18 @@ def singlePost(id:int, db:Session):
 
     return single_post
     
-
+    
 # Delete a Post
-def delete(id: int, db: Session, values: Dict={}):
+def delete(id: int, db: Session, user:int):
 
     deleted_post = db.query(Post).filter(Post.id == id)
     
     post = deleted_post.first()
  
-    if not post:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"post id:{id} does not exist!")
-
-    elif post.user_id != account_owner.id:
-        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail=f"You can't perform this action!")
-
     deleted_post.delete()
     db.commit()
     
-    return Response(status_code = status.HTTP_204_NO_CONTENT)
+    return post
 
 
 # Edit/Update a Post

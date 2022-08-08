@@ -8,11 +8,10 @@ from ...database import get_db
 
 
 def create_post(post:Post, db: Session,  user:int= Depends(oauth2.get_current_user)):
-    return create(db=db, post=post, user=user)
+    return create(post=post, db=db, user=user)
 
-
-def myPost(post:Post, db: Session, user:int = Depends(oauth2.get_current_user)):
-    return personal_post(db=db, post=post, user=user)
+def myPost(db: Session, user: int= Depends(oauth2.get_current_user)):
+    return personal_post(db=db)
 
 def get_all_post(db: Session, user:int = Depends(oauth2.get_current_user)):
     return allPost(db=db)
@@ -52,12 +51,25 @@ def updatePost(id:int, post:Post, user:int, db: Session, values: Dict={}):
     
     editpost =  update(id=id, post=post, db=db, values=values)
 
-    if not editpost :
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, datail=f"post with id:{id} does not exist!")
+    if not editpost:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"post with id:{id} does not exist!")
     
     elif editpost.user_id != user.id:
         raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail = f"You can't perform this action!")
     
     return editpost 
+
+
+def delete_post(id: int, db: Session,  user : int = Depends(oauth2.get_current_user)):
+    
+    destroy = delete(id=id, user=user, db=db)
+    
+    if not destroy:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"post id:{id} does not exist!")
+
+    elif destroy.user_id != user.id:
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail=f"You can't perform this action!")
+    
+    return destroy
 
 

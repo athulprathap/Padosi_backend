@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from ..modules.posts.postRepository import create_post, myPost, get_all_post, single_Post, updatePost
+from ..modules.posts.postRepository import create_post, myPost, get_all_post, single_Post, updatePost, delete_post
 from ..pydantic_schemas.posts import Post, PostAll, PostOpt, CreatePost
 from typing import  List
 from sqlalchemy.orm import Session
@@ -11,9 +11,9 @@ router = APIRouter(tags = ['Posts'])
 
 
 # Get post Created only by owner
-@router.get("/ownerPost", response_model=PostAll)
-async def get_owner_post(post:Post, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
-    return myPost(db=db, post=post, user=user)
+@router.get("/ownerPost", response_model=List[PostAll])
+async def get_owner_post(db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
+    return myPost(db=db,  user=user)
 
 
 # Get all Post
@@ -40,10 +40,10 @@ async def get_singlepost(id:int, db:Session = Depends(get_db), user: int = Depen
     return single_Post(id=id, db=db)
 
 
-# # Delete a Post
-# @router.delete("/delete/{id}", status_code = status.HTTP_204_NO_CONTENT)
-# async def delete_Post(id: int, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):    
-#     return delete(id, db, account_owner)
+# Delete a Post
+@router.delete("/delete/{id}", status_code = status.HTTP_204_NO_CONTENT)
+async def delete_Post(id: int, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):    
+    return delete_post(id=id, db=db, user=user)
 
 
 # Edit/Update a Post
