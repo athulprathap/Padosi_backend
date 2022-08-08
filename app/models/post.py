@@ -28,12 +28,12 @@ class Like(Base):
 
 
 
-def personal_post(db: Session,  account_owner: int = Depends(oauth2.get_current_user)):
-    owner_post = db.query(Post).filter(Post.user_id == account_owner.id).all()
+def personal_post(db: Session, user:int):
+    owner_post = db.query(Post).filter(Post.user_id == user.id).all()
     return  owner_post
 
 
-def create(post:Post, db: Session, user: str):
+def create(post:Post, db: Session, user: int):
     newPost = Post( title=post.title, content=post.content, published=post.published, user=user)
     
     db.add(newPost)
@@ -50,36 +50,17 @@ def allPost(db: Session, limit:int = 4, skip:int = 0, option: Optional[str] = ""
         
     return allPost 
 
-
-# def like_unlike(like: Likes, db: Session = Depends(get_db), account_owner: int = Depends(oauth2.get_current_user)):
     
-#     query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == account_owner.id)
-    
-#     isLiked = query_like.first()
-    
-#     if (like.dir == 1):
-#         if isLiked:
-#             raise HTTPException(status_code= status.HTTP_409_CONFLICT, detail= f"You have already liked this post!")
-#         newLike = Like(post_id = like.post_id, user_id = account_owner.id)
-#         db.add(newLike)
-#         db.commit()
-#         return {"msg": "You Liked this Post!"}
-#     else: 
-#         if not isLiked:
-#             raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail= f"Like not found!")
-         
-#         query_like.delete()
-#         db.commit()
+def like_unlike(db: Session , like: Likes,  user: int):
         
-#         return {"msg": "You unliked this post"}
-
-
+       query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == user.id)
+       
+       isLiked = query_like.first()
+       
+       query_like.delete(synchronize_session=False)
+       db.commit()
     
-# def like_unlike(like: Likes, db: Session = Depends(get_db), user:str=None):
-        
-#        query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == user.id)
-    
-#        return query_like.first()
+       return isLiked 
 
 
 def singlePost(id:int, db:Session):
