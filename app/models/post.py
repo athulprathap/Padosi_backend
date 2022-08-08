@@ -28,11 +28,13 @@ class Like(Base):
 
 
 
+# Get only my post
 def personal_post(db: Session, user:int):
     owner_post = db.query(Post).filter(Post.user_id == user.id).all()
     return  owner_post
 
 
+# Create a post
 def create(post:Post, db: Session, user: int):
     newPost = Post( title=post.title, content=post.content, published=post.published, user=user)
     
@@ -42,13 +44,15 @@ def create(post:Post, db: Session, user: int):
     
     return newPost
 
+
 # Get all post
-def allPost(db: Session, limit:int = 4, skip:int = 0, option: Optional[str] = ""):
+def allPost(db: Session, limit:int = 9, skip:int = 0, option: Optional[str] = ""):
     # join tables and get the results
     allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
             isouter=True).group_by(Post.id).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
         
     return allPost 
+
 
     # Like and Unlike a post
 def like_unlike(db: Session , like: Likes,  user: int):
@@ -61,6 +65,7 @@ def like_unlike(db: Session , like: Likes,  user: int):
        db.commit()
     
        return isLiked 
+
 
 # Get a post
 def singlePost(id:int, db:Session):

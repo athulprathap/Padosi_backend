@@ -11,7 +11,7 @@ router = APIRouter(tags = ['Posts'])
 
 
 # Get post Created only by owner
-@router.get("/ownerPost", response_model=List[Post])
+@router.get("/ownerPost")
 async def get_owner_post(db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
     return myPost(db=db, user=user)
 
