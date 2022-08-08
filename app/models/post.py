@@ -42,7 +42,7 @@ def create(post:Post, db: Session, user: int):
     
     return newPost
 
-
+# Get all post
 def allPost(db: Session, limit:int = 4, skip:int = 0, option: Optional[str] = ""):
     # join tables and get the results
     allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
@@ -50,7 +50,7 @@ def allPost(db: Session, limit:int = 4, skip:int = 0, option: Optional[str] = ""
         
     return allPost 
 
-    
+    # Like and Unlike a post
 def like_unlike(db: Session , like: Likes,  user: int):
         
        query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == user.id)
@@ -62,7 +62,7 @@ def like_unlike(db: Session , like: Likes,  user: int):
     
        return isLiked 
 
-
+# Get a post
 def singlePost(id:int, db:Session):
     
     single_post = db.query(Post, func.count(Like.post_id).label("likes")).join(Like,
