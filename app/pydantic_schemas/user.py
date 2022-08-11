@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, constr
 from  datetime import datetime
+from decimal import Decimal
 from typing import Optional
 from pydantic.types import conint
 
@@ -8,7 +9,7 @@ from pydantic.types import conint
 class User(BaseModel):
     username: str 
     email: str
-    password: str
+    password: constr(min_length=6, max_length=30)
     # image: str
     created_at = datetime 
 
@@ -32,3 +33,9 @@ class UserUpdate(BaseModel):
     class Config:
         orm_mode = True
         
+class updatePassword(BaseModel):
+    password: constr(min_length=7, max_length=100)
+    salt: str
+
+    class Config:
+        orm_mode = True
