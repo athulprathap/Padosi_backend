@@ -1,10 +1,9 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, func
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from typing import  List, Optional, Dict
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from ..import oauth2
 from ..pydantic_schemas.posts import Post, CreatePost, Likes, PostOpt

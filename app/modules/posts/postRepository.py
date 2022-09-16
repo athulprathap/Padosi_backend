@@ -40,7 +40,7 @@ def single_Post(db: Session, id: int):
     post = singlePost(id=id, db=db)
     
     if not post:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"User not found!")
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail=f"Post not found!")
     
     return post
 

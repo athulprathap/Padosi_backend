@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+# from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -35,7 +35,7 @@ def singleUser(db: Session, id: int):
 
 
 def update_user(db: Session,  user: User, id: int, values: Dict={}):
-    
+    values['updated_at'] = create_customised_datetime()
     updated = db.query(User).filter(User.id == id)
     
     updated.update(values)

@@ -24,7 +24,7 @@ def access_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, ALGORITHM)
 
     return encoded_jwt
-
+# if access token match provided credentials, Authorise user.
 def verify_access_token(token, credentials_exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
