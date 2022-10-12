@@ -1,4 +1,15 @@
 from passlib.context import CryptContext
+from os import environ
+import string
+from starlette.config import Config
+from random import choice
+from twilio.rest import Client
+from datetime import datetime
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from typing import List
+from starlette.config import Config
+
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -9,20 +20,47 @@ def verify(password, hashed_password):
     return pwd_context.verify(password, hashed_password)
 
 
+def random(digits: int):
+    chars = string.digits
+    return ''.join(choice(chars) for _ in range(digits))
 
-# """
-# testing another method of hashing
-# """
-# class Authenticate:
-#     def create_salt_and_hashed_password(self, *, plaintext_password: str):
-#         salt = self.generate_salt()
-#         hashed_password = self.hash_password(password=plaintext_password, salt=salt)
-#         return updatePassword(salt=salt, password=hashed_password)
+config = Config(".env")
 
+time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-#     def generate_salt():
-#         return bcrypt.gensalt().decode()
+client = Client(config('account_sid'),config('auth_token'))
 
+# send a otp to phone using twiilo 
+def OTP_send(msg, phone):
+    message = client.messages.create(
+        body=msg,
+        from_=config('my_twilio'),
+        to=phone
+    )
+    return message.sid
 
-#     def hash_password(*, password: str, salt: str) -> str:
-#         return pwd_context.hash(password + salt)
+#load .env file
+config = Config(".env")
+
+conf = ConnectionConfig(
+    MAIL_USERNAME = config("MAIL_USERNAME"),
+    MAIL_PASSWORD = config("MAIL_PASSWORD"),
+    MAIL_FROM = config("MAIL_FROM"),
+    MAIL_PORT = config("MAIL_PORT"),
+    MAIL_SERVER = config("MAIL_SERVER"),
+    MAIL_TLS = config("MAIL_TLS"),
+    MAIL_SSL = config("MAIL_SSL"),
+    USE_CREDENTIALS = config("USE_CREDENTIALS"),
+    VALIDATE_CERTS = config("VALIDATE_CERTS")
+)
+
+async def send_email(subject: str, recipients: list, message: str):
+    message = MessageSchema (
+        subject=subject,
+        recipients=recipients,
+        body=message,
+        subtype = "html"
+    )
+
+    mail = FastMail(conf)
+    await mail.send_message(message)

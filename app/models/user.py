@@ -1,14 +1,19 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+import string
+import datetime
+from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey,Numeric
 # from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from ..database import  Base , get_db
 from typing import Dict
+from .. import schema
 from ..pydantic_schemas.user import CreateUser
+from sqlalchemy.orm import relationship
 
 
-class User(Base):
+class User(BaseModel,Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String, nullable=False)
@@ -16,6 +21,26 @@ class User(Base):
     password = Column(String, nullable=False)
     # image = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+class Address(BaseModel,Base):
+    __tablename__ = 'address' 
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    housenumber: String = Column(String)
+    apartment: String = Column(String)
+    city: String = Column(String)
+    area: String = Column(String)
+    pincode: Integer = Column(Integer)
+    state: String=Column(String)
+    latitude = Column(Numeric, nullable=True)
+    longitude = Column(Numeric, nullable=True)
+    user: relationship('User', back_populates='address')
+
+class Vote(Base):
+    __tablename__ = "votes"
+
+    user_id = Column(Integer, ForeignKey("users.id",ondelete="CASCADE"),primary_key=True)
+    post_id = Column(Integer, ForeignKey("posts.id",ondelete="CASCADE"),primary_key=True)
     
 
 def create_user(user: CreateUser, db: Session,):
@@ -35,10 +60,15 @@ def singleUser(db: Session, id: int):
 
 
 def update_user(db: Session,  user: User, id: int, values: Dict={}):
-    values['updated_at'] = create_customised_datetime()
+    values['updated_at'] = datetime()
     updated = db.query(User).filter(User.id == id)
     
     updated.update(values)
     db.commit()
     
     return updated.first()
+
+
+def deactivate_user(current_user: schema.UserList):
+    query = "UPDATE my_users SET status='0' WHERE status='1' and email=:email"
+    return get_db.execute(query, values= {"email": current_user.email})

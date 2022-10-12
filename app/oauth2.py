@@ -49,3 +49,12 @@ def get_current_user(token = Depends(oauth2_scheme), db: Session = Depends(get_d
     user = db.query(User).filter(User.id == token.id).first()
 
     return user
+
+def get_current_active_user(current_user: schema.UserList = Depends(get_current_user)):
+    if current_user.status != "1":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not active")
+    
+    return current_user
+
+def get_token_user(token: str = Depends(oauth2_scheme)):
+    return token
