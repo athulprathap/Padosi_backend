@@ -44,5 +44,4 @@ def vote(
             )
         vote_query.delete(synchronize_session=False)
         db.commit()
-        
         return {"message": "vote deleted"}
