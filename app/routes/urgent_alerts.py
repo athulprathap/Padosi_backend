@@ -9,7 +9,7 @@ from ..pydantic_schemas.user import CreateUser, UserOpt,  User, UserUpdate
 import os
 
 
-router = APIRouter( tags = ['urgent_alerts'])
+router = APIRouter(tags = ['urgent_alerts'])
 
 @router.get("/urgent-alerts")
 async def get_all_urgent_alerts():
