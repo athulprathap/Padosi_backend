@@ -89,11 +89,11 @@ def delete(id: int, db: Session, user:int):
 
 
 # Edit/Update a Post
-def update(id:int, post:CreatePost, db: Session , values: Dict={}):
+def update(id:int, alert:CreatePost, db: Session , values: Dict={}):
 
-    editedPost = db.query(Post).filter(Post.id == id)
+    editedalert = db.query(alert).filter(alert.id == id)
     
-    editedPost.update(values)
+    editedalert.update(values)
     db.commit()
 
-    return editedPost.first()
+    return editedalert.first()
