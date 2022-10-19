@@ -83,3 +83,6 @@ class InfoOTP(VerifyOTP):
 class Vote(BaseModel):
     post_id: int
     dir: conint(le=1)
+
+class DeviceToken(BaseModel):
+    token: str

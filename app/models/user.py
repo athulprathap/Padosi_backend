@@ -1,8 +1,8 @@
-import string
+
 import datetime
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey,Numeric
-# from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -13,8 +13,8 @@ from ..pydantic_schemas.user import CreateUser
 from sqlalchemy.orm import relationship
 
 
-class User(BaseModel,Base):
-    __tablename__ = "users"
+class User(Base):
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
@@ -22,7 +22,7 @@ class User(BaseModel,Base):
     # image = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
-class Address(BaseModel,Base):
+class Address(Base):
     __tablename__ = 'address' 
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)

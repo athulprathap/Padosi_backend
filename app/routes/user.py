@@ -42,7 +42,7 @@ def find_nearby_users(user_id: int, radius: int = 10, db: Session = Depends(get_
 @router.patch("/user/upload-profile-image")
 async def upload_profile_image(
     file: UploadFile = File(...),
-    currentUser: User.UserList = Depends(oauth2.get_current_active_user)
+    currentUser: schema.UserList = Depends(oauth2.get_current_active_user)
 ):
     try:
         cwd = os.getcwd()

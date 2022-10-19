@@ -1,5 +1,5 @@
 from .. import database,schema
-from ..database import get_db
+from ..database import Base
 
 
 def find_otp_block(recipient_id: str):

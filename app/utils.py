@@ -64,3 +64,15 @@ async def send_email(subject: str, recipients: list, message: str):
 
     mail = FastMail(conf)
     await mail.send_message(message)
+
+
+# async def push_notification(device_token, data):
+#     push_service = FCMNotification(
+#         api_key=SERVER_KEY)
+
+#     try:
+#         result1 = push_service.notify_single_device(registration_id=device_token, data_message=data)
+#         print("message sent")
+#     except:
+#         return False
+#     return True
