@@ -1,3 +1,5 @@
+from enum import unique
+import json
 from .models.user import create_user, update_user, singleUser,Address,deactivate_user,Vote
 from .models.post import create, singlePost, delete, update, allPost, Like, personal_post, like_unlike,Post
 from .models.otp import find_otp_block,find_otp_life_time,save_otp,save_otp_failed_count,save_block_otp,disable_otp
@@ -25,11 +27,11 @@ class DeviceToken(Base, BaseModel):
 
 
 
-class Notification(Base, BaseModel):
-    __tablename__ = "notifications"
+class user_devices(Base, BaseModel):
+    __tablename__ = "user_devices"
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    subject = Column(String, nullable=False)
-    message = Column(String, nullable=False)
-    is_sent = Column(Boolean, server_default="FALSE", nullable=False)
+    token = Column(String(255),unique=True, nullable=False)
+    device_info = Column(json, nullable=True)
+

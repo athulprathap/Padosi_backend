@@ -1,5 +1,4 @@
 from passlib.context import CryptContext
-from os import environ
 import string
 from starlette.config import Config
 from random import choice
@@ -8,8 +7,6 @@ from datetime import datetime
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from typing import List
 from starlette.config import Config
-
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -65,14 +62,3 @@ async def send_email(subject: str, recipients: list, message: str):
     mail = FastMail(conf)
     await mail.send_message(message)
 
-
-# async def push_notification(device_token, data):
-#     push_service = FCMNotification(
-#         api_key=SERVER_KEY)
-
-#     try:
-#         result1 = push_service.notify_single_device(registration_id=device_token, data_message=data)
-#         print("message sent")
-#     except:
-#         return False
-#     return True
