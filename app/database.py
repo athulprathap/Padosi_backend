@@ -12,7 +12,7 @@ import databases
 #                "@" + settings().database_port + ":" + settings().settings.database_name+ "/")
 
 # database = databases.Database(database_pgsql_url_config())
-engine = create_engine("postgresql://postgres:password@localhost/padosii",
+engine = create_engine("postgresql://postgres:8085@localhost/padossii",
 echo=True)
 
 Base = declarative_base()

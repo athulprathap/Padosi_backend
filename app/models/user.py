@@ -1,7 +1,7 @@
 
 import datetime
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey,Numeric
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey,Numeric, true
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
@@ -30,11 +30,17 @@ class Address(Base):
     apartment: String = Column(String)
     city: String = Column(String)
     area: String = Column(String)
-    pincode: Integer = Column(Integer)
+    pincode: Integer = Column(Integer, nullable=False)
     state: String=Column(String)
     latitude = Column(Numeric, nullable=True)
     longitude = Column(Numeric, nullable=True)
     user: relationship('User', back_populates='address')
+    
+class Neighbour(Base):
+    __tablename__='neighbour'
+    id= Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, primary_key=True)
+    pincode: Integer = Column(Integer, nullable=False)
+          
 
 class Vote(Base):
     __tablename__ = "votes"
@@ -72,3 +78,7 @@ def update_user(db: Session,  user: User, id: int, values: Dict={}):
 def deactivate_user(current_user: schema.UserList):
     query = "UPDATE my_users SET status='0' WHERE status='1' and email=:email"
     return get_db.execute(query, values= {"email": current_user.email})
+
+def neighbour_user(db:Session, neigh:Neighbour, pincode:int):
+    neighbour=db.query(Neighbour).filter(Neighbour.pincode==pincode)
+    return neighbour
