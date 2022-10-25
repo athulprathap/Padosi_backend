@@ -1,7 +1,9 @@
+from operator import ge
 from fastapi import FastAPI, Response, requests, status, HTTPException, Depends, APIRouter, File, UploadFile
 from sqlalchemy.orm import Session
-from app.models.urgent_alerts import get_others_urgent_alert
+from app.models.urgent_alerts import create_response, get_others_urgent_alert, get_response
 from app.models.user import neighbour_user
+from ..routes.notifications import is_notification_enable, is_preview_message_enable, create_device_token, get_user_device_token
 
 from app.pydantic_schemas.urgent_alerts import urgent_alerts
 from .. import oauth2
@@ -23,6 +25,7 @@ async def get_all_urgent_alerts(id:int, db:Session =Depends(get_db),user: int = 
 
 @router.post("/urgent-alerts", status_code=status.HTTP_201_CREATED,  response_model=PostOpt)
 async def create_new_urgent_alerts(alert:urgent_alerts, db: Session = Depends(get_db), user:int= Depends(oauth2.get_current_user)):
+ #   device_token = get_user_device_token(db=db)
     return create_alert(db=db, alert=alert, user=user)
 
 @router.get("/urgent-alerts/count")
@@ -41,6 +44,11 @@ async def update_urgent_alert(id:int, alert:create_alert, db: Session = Depends(
 async def delete_urgent_alerts(id: int, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):    
     return delete_alert(id=id, db=db, user=user)
 
+@router.post("/urgent-alerts/{id}/respond")
+async def respond_to_urgent_alerts(id:int, db:Session= Depends(get_db), user: int= Depends(oauth2.oauth2.get_current_user)):
+    return create_response(response=respond_to_urgent_alerts, db=db, user=neighbour_user)
+
 @router.get("/urgent-alerts/{id}/respond")
-async def respond_to_urgent_alerts():
-    pass
+async def get_response_of_urgent_alerts(id:int, db:Session= Depends(get_db), user: int= Depends(oauth2.oauth2.get_current_user)):
+    return get_response(user=user, db=db)
+    

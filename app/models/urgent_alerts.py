@@ -10,6 +10,7 @@ from ..import oauth2
 from ..pydantic_schemas.urgent_alerts import urgent_alerts,Createalert 
 from .user import Address, User, neighbour_user, Neighbour
 from ..database import get_db, Base
+from ..routes.notifications import is_notification_enable, get_user_device_token, create_device_token, is_preview_message_enable
 
 class urgent_alerts(Base):
     __tablename__ = "urgent_alerts"
@@ -32,7 +33,21 @@ def personal_alert(db: Session, user:int):
     owner_urgent_alert = db.query(urgent_alerts).filter(urgent_alerts.user_id == user.id).all()
     return  owner_urgent_alert
     
+# respond to alerts
+
+def create_response(id:int,response:respond_to_alerts, db:Session, user:int):
+    res=respond_to_alerts(respond=response.respond, user=user)
     
+    db.add(res)
+    db.commit()
+    db.refresh(res)
+    
+    return res
+
+def get_response(user:int,db:Session):
+    res=db.query(respond_to_alerts).filter(respond_to_alerts.id==user.id).all()
+    return res
+
 # Create a new alert
 def create_alert(alert:urgent_alerts, db: Session, user: int):
     newalert = urgent_alerts( title=alert.title, content=alert.content, published=alert.published, user=user)
@@ -54,7 +69,7 @@ def get_total_urgent_alerts(id:int, db:Session, user:list):
 #get neighbour user
 def neighbour_user(db:Session,pincode:int):
     neighbour=neighbour_user(db=db,pincode=pincode)
-    return [neighbour]
+    return neighbour
     
 
 #Get post of others
@@ -85,6 +100,6 @@ def update_alert(id:int, alert:Createalert, db: Session , values: Dict={}):
 
     return editedalert.first()
 
-def respond_to_alert(id:int, user:int, alert:urgent_alerts):
-    pass
+
+
 
