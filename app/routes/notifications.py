@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.notify.schema import UserDevice, UserDevicePayload, Response, MessagePayload
 from .. import nutils
 
-router = APIRouter()
+router = APIRouter(tags = ['notifications'])
 
 
 @router.post("/v1/register", response_model=UserDevice, status_code=201)

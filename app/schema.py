@@ -40,7 +40,25 @@ class UserBase(BaseModel):
     email: str
     password: str
     # image: str
-    created_at = datetime 
+    created_at = datetime
+
+class CreateComment(BaseModel):
+    post_id: int
+    content: str
+
+class CommentResponse(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    user_id: int
+    post_id: int
+    com_owner: Optional[UserBase]  # NOTE: use optional just for testing
+
+    class Config:
+        orm_mode = True
+
+    class config:
+        orm_mode = True
 
 class CreateUser(UserBase):
      pass
@@ -86,3 +104,14 @@ class Vote(BaseModel):
 
 class DeviceToken(BaseModel):
     token: str
+
+class Events(BaseModel):
+    content: str
+    description: str
+    area: str
+    region: str
+    pincode: int
+
+class EventRespond(BaseModel):
+    event_id: int
+    dir: int
