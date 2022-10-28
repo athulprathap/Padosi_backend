@@ -1,3 +1,4 @@
+from Padosi_backend.app.dbmanager import get_tokens
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from requests import session
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, func
@@ -10,6 +11,7 @@ from ..import oauth2
 from ..pydantic_schemas.urgent_alerts import urgent_alerts,Createalert 
 from .user import Address, User, neighbour_user, Neighbour
 from ..database import get_db, Base
+from ..notify.ncrud import get_tokens
 from ..routes.notifications import is_notification_enable, get_user_device_token, create_device_token, is_preview_message_enable
 
 class urgent_alerts(Base):
@@ -28,7 +30,7 @@ class respond_to_alerts(Base):
     respond=Column(String, nullable=False)
 
 class DeviceToken(Base):
-    _tablename_ = "device_tokens"
+    _tablename_ = "device_token"
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
@@ -37,6 +39,18 @@ class DeviceToken(Base):
     message_preview = Column(Boolean, server_default= "TRUE", nullable= True)
     pincode: Integer = Column(Integer, nullable=False)
 
+def add_into_tokens_table(user:int, db:Session):
+    tokenn=get_tokens(user_id=oauth2.get_current_active_user)
+    t=DeviceToken(tokenn=DeviceToken.token, user=user)
+    db.add(t)
+    db.commit()
+    db.refresh(t)
+    
+def get_tokens_of_neighbour(user:int, db:Session):
+    res=db.query(DeviceToken).filter(DeviceToken.pincode==user.pincode).all()
+    return res
+
+        
 # Get only my alert
 
 def personal_alert(db: Session, user:int):
@@ -61,7 +75,6 @@ def get_response(user:int,db:Session):
 # Create a new alert
 def create_alert(alert:urgent_alerts, db: Session, user: int):
     newalert = urgent_alerts( title=alert.title, content=alert.content, published=alert.published, user=user)
-    
     db.add(newalert)
     db.commit()
     db.refresh(alert)

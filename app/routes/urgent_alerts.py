@@ -8,6 +8,7 @@ from ..utils import  push_notification
 from app.pydantic_schemas.urgent_alerts import urgent_alerts
 from .. import oauth2
 from .. import model,schema
+from ... import FCMmanager
 from ..pydantic_schemas.posts import Post, PostAll, PostOpt, CreatePost, Likes
 from sqlalchemy import func
 from ..database import get_db
@@ -25,12 +26,9 @@ async def get_all_urgent_alerts(id:int, db:Session =Depends(get_db),user: int = 
 
 @router.post("/urgent-alerts", status_code=status.HTTP_201_CREATED,  response_model=PostOpt)
 async def create_new_urgent_alerts(alert:urgent_alerts, db: Session = Depends(get_db), user:int= Depends(oauth2.get_current_user)):
-    tokenn=get_user_device_token(db=db)
-    data = {
-        "title": "Urgent alert",
-        "message": "New urgent alert has been created"
-    }
-    await push_notification(tokenn, data)
+    tokens=get_tokens_of_neighbour(user=user, db=db)
+    converted_tokens = [value for (value,) in tokens]
+    FCMmanager.send(msg="A new urgent alert has been created from your neighbour",title="Urgent alert",body="A new urgent alert in the neighbourhood",tokens=converted_tokens)
     return create_alert(db=db, alert=alert, user=user)
 
 @router.get("/urgent-alerts/count")
@@ -52,16 +50,14 @@ async def delete_urgent_alerts(id: int, db: Session = Depends(get_db), user: int
 @router.post("/urgent-alerts/{id}/respond")
 async def respond_to_urgent_alerts(id:int, db:Session= Depends(get_db), user: int= Depends(oauth2.oauth2.get_current_user)):
     if urgent_alerts:
+        tokens=get_tokens_of_neighbour(user=user, db=db)
+        converted_tokens = [value for (value,) in tokens]
+        FCMmanager.send(msg="A new urgent alert response has been created from your neighbour",title="Urgent alert",body="A new urgent alert response in the neighbourhood",tokens=converted_tokens)
         return create_response(response=respond_to_urgent_alerts, db=db, user=neighbour_user)
 
 @router.get("/urgent-alerts/{id}/respond")
 async def get_response_of_urgent_alerts(id:int, db:Session= Depends(get_db), user: int= Depends(oauth2.oauth2.get_current_user)):
     tokenn=get_user_device_token(db=db)
-    data = {
-        "title": "Response to alert",
-        "message": "Someone responded to urgent alerts "
-    }
-    if urgent_alerts:
-        await push_notification(tokenn, data)
+    send_notification_to_neighbours(user=user, db=db)
     return get_response(user=user, db=db)
     
