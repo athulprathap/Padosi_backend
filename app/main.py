@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from app.routes import events
 from .database import engine, Base
-from .routes import user,post,auth,votes,otp,comments,events
+from .routes import user,post,auth,votes,otp,comments,events,urgent_alerts
 
 
 
@@ -19,6 +19,7 @@ app.include_router(comments.router)
 app.include_router(otp.router)
 # app.include_router(notifications.router)
 app.include_router(events.router)
+app.include_router(urgent_alerts.router)
 
 
 
