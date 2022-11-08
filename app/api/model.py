@@ -203,3 +203,8 @@ class Search(Base):
         "users.id", ondelete="CASCADE"))
     recent_search = Column((String), nullable=True)
 
+class Popular_search(Base):
+    __tablename__= 'popular_search'
+    id = Column(Integer, primary_key=True, nullable=False)
+    Popular_search = Column((String),nullable=True)
+

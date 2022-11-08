@@ -1,22 +1,22 @@
-version: '3.8'
+version: '3.3'
 services: 
   api:
     build: .
     container_name: padosi-fastapi-docker-v2
     env_file:
-      - ./app/.env
+      - ./.env
     ports: 
       - 8000:80
     volumes: 
       - ./api:/api
-      - ./upload-images/:/upload-images/user/
+      # - ./upload-images/:/upload-images/user/
 
   db:
     image: postgres:13-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./app/.env
+      - ./.env
     ports:
       - 5430:5430
 volumes:

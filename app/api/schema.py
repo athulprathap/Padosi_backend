@@ -230,3 +230,5 @@ class Search(BaseModel):
     recent_search:str
     class Config():
         orm_mode=True
+
+
