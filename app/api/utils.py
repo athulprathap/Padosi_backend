@@ -3,6 +3,7 @@ import string
 from starlette.config import Config
 from random import choice
 from twilio.rest import Client
+from . import model
 from datetime import datetime
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from typing import Dict, List
@@ -83,6 +84,21 @@ async def send_otp_mail(email, otp):
     await fm.send_message(message)
     return JSONResponse(status_code=200, content={"message": "email has been sent"})
 
+
+def operation_after_block(db, blocker_user, blocked_user):
+    blocker_query = db.query(model.UserRecommadation).filter(
+        model.UserRecommadation.user_id == blocked_user,
+        model.UserRecommadation.self_user_id == blocker_user)
+
+    blocked_query = db.query(model.UserRecommadation).filter(
+        model.UserRecommadation.user_id == blocker_user,
+        model.UserRecommadation.self_user_id == blocked_user)
+
+    if blocker_query.first():
+        blocker_query.delete()
+    if blocked_query.first():
+        blocked_query.delete()
+    return True
 
 
 def random_with_N_digits(n):

@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Response, requests, status, HTTPException, Depends, APIRouter, File, UploadFile
 from sqlalchemy.orm import Session
 from  ..oauth2 import get_current_user,get_current_active_user
-from .. import model,schema
+from .. import model,schema,crud
 from sqlalchemy import func
+from ..utils import operation_after_block
 from ..database import get_db
 from ..modules.userRepository import register_new, updateUser,singleUser
 from ..schema import UserOpt,  User, UserUpdate
@@ -42,11 +43,23 @@ async def delete_user(id, db: Session = Depends(get_db), account_owner: int = De
     return "deleted successfully"
 
 @router.get("/nearby_users/{user_id}")
-def find_nearby_users(user_id: int, radius: int = 10, db: Session = Depends(get_db)):
+def find_nearby_users(user_id: int, radius: int = 0, db: Session = Depends(get_db)):
     """raius is in km"""
     current_user = db.query(model.Address).filter(model.Address == user_id).first()
-    users = db.query(model.Address).filter(model.Address.user_id != user_id, func.public.calculate_distance(model.Address.latitude, model.Address.longitude, current_user.latitude, current_user.longitude, "K") <= radius).all()
+    users = db.query(model.Address).filter(model.Address.user_id != user_id, func.public.calculate_distance(model.Address.pincode, current_user.pincode, current_user.pincode, "K")<=radius).all()
     return users
+
+@router.post("/adress/{user_id}")
+def create_event(event: schema.address, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+
+    address = model.Address(user_id=current_user.id,housenumber=event.housenumber,apartment=event.apartment,
+    city=event.city,area=event.area,pincode=event.pincode,state=event.s)
+
+    db.add(address)
+    db.commit()
+    db.refresh(address)
+
+    return address
 
 @router.patch("/user/upload-profile-image")
 async def upload_profile_image(
@@ -81,9 +94,35 @@ async def deactivate_account(
     current_user: schema.UserList= Depends(get_current_user)):
 
     # deactivate user account
-    await model.deactivate_user(current_user)
+    await crud.deactivate_user(current_user)
 
     return {
         "status_code" : status.HTTP_200_OK,
         "message" : "User account deactivated successfully"
     }
+
+@router.post("/report_and_block")
+def report_and_block_user(report_user: schema.ReportUser, db: Session = Depends(get_db),
+    current_user: int = Depends(get_current_user)):
+    already_blocked = db.query(model.BlockUser).filter(
+        model.BlockUser.blocked_user == report_user.user_id,
+        model.BlockUser.blocker_user == current_user.id).first()
+
+    report = model.ReportUser(reported_to=report_user.user_id, reported_by=current_user.id, message=report_user.message)
+
+    block_user = model.BlockUser(
+        blocked_user= report_user.user_id,
+        blocker_user= current_user.id
+    )
+
+    if not already_blocked:
+        db.add(block_user)
+
+    status = operation_after_block(current_user.id, report_user.user_id)
+    if status:
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        return report
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="Please try again")

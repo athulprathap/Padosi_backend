@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import user,post,auth,votes,otp,comments,events
+from app.api.routes import user,post,auth,votes,otp,comments,events,search
 from app.api.database import engine, Base,database
 
 
@@ -25,8 +25,8 @@ app.include_router(comments.router)
 app.include_router(otp.router)
 # app.include_router(notifications.router)
 app.include_router(events.router)
-
-
+app.include_router(search.router)
+# app.include_router(urgentalerts.router)
 
 @app.get("/")
 def root():

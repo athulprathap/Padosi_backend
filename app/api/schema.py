@@ -142,10 +142,27 @@ class InfoOTP(VerifyOTP):
     otp_failed_count: int
     status: str
 
+class address(BaseModel):
+    housenumber: str
+    apartment: str
+    city: str
+    area: str
+    pincode: int
+    state: str
+
 class Vote(BaseModel):
     post_id: int
     dir: conint(le=1)
 
+class BlockedUser(BaseModel):
+    user_id: int
+
+
+class ReportUser(BaseModel):
+    user_id: int
+    message: str
+    # viewed: bool
+    
 class DeviceToken(BaseModel):
     token: str
 
@@ -196,3 +213,20 @@ class MessagePayload(BaseModel):
     user_id: int = Field(..., gt=0, description="user_id must be greater than 0")
     message: str
     notify: Dict
+
+
+    # urgent_alert models
+class urgent_alerts(BaseModel):
+    title: str
+    content: str
+    published: bool = True
+    created_at = datetime
+
+#The "createalert" class will automatically inherit the "Base" proprties and populate every field
+class Createalert(urgent_alerts): 
+    pass
+
+class Search(BaseModel):
+    recent_search:str
+    class Config():
+        orm_mode=True

@@ -5,7 +5,7 @@ from typing import Sequence
 from grpc import server
 
 from requests import session
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, Numeric, DateTime,Sequence
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, Numeric, DateTime,Sequence,ARRAY
 from sqlalchemy.orm import relationship
 from .database import Base
 import datetime
@@ -23,7 +23,9 @@ class User(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
+    is_admin = Column(Boolean, server_default="FALSE", nullable=False)
     password = Column(String, nullable=False)
+    is_deleted = Column(Boolean, server_default="FALSE", nullable=False)
     # passcode = Column(String, nullable=True)  # used for forgot user
     # passcode_expiry_time = Column(TIMESTAMP(timezone=True), nullable=True)
     # image = Column(String, nullable=False)
@@ -42,6 +44,51 @@ class Address(Base):
     latitude = Column(Numeric, nullable=True)
     longitude = Column(Numeric, nullable=True)
     user: relationship('User', back_populates='address')
+
+class BlockUser(Base):
+    __tablename__ = "block_users"
+
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    blocked_user = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    blocker_user = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+
+class urgent_alerts(Base):
+    __tablename__ = "urgent_alerts"
+    id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String, nullable=False)
+    content = Column(String, nullable=False)
+    published = Column(Boolean, server_default='TRUE', nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user = relationship("User")
+    
+class respond_to_alerts(Base):
+    __tablename__="response"
+    id=Column(Integer, ForeignKey("urgent_alerts.id", ondelete="CASCADE"),primary_key=True)
+    respond=Column(String, nullable=False)
+
+
+class UserRecommadation(Base):
+    __tablename__ = "user_recommmandations"
+
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    self_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    status = Column(
+        String,
+        Enum("L", "U", "PENDING", "MAYBE", name="status"),
+        nullable=False,
+        default="PENDING",
+    )
+
+class ReportUser(Base, BaseModel):
+    __tablename__ = "report_users"
+
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    reported_by = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    reported_to = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    message = Column(String, nullable=False)
+    viewed = Column(Boolean, server_default="FALSE", nullable=False)
 
 class Vote(Base):
     __tablename__ = "votes"
@@ -147,4 +194,12 @@ class EventRespond(Base):
     user_id = Column(Integer, ForeignKey(
         "users.id", ondelete="CASCADE"), primary_key=True)
     event_id = Column(Integer, ForeignKey(
-        "event.id", ondelete="CASCADE"), primary_key=True)
+        "events.id", ondelete="CASCADE"), primary_key=True)
+
+class Search(Base):
+    __tablename__= 'search'
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey(
+        "users.id", ondelete="CASCADE"))
+    recent_search = Column((String), nullable=True)
+
