@@ -54,8 +54,8 @@ conf = ConnectionConfig(
     MAIL_SERVER = config("MAIL_SERVER"),
     MAIL_STARTTLS = config("MAIL_STARTTLS"),
     MAIL_SSL_TLS = config("MAIL_SSL_TLS"),
-    MAIL_TLS = config("MAIL_TLS"),
-    MAIL_SSL = config("MAIL_SSL"),
+    #MAIL_TLS = config("MAIL_TLS"),
+    #MAIL_SSL = config("MAIL_SSL"),
     USE_CREDENTIALS = config("USE_CREDENTIALS"),
     VALIDATE_CERTS = config("VALIDATE_CERTS")
 )
