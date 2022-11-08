@@ -22,7 +22,7 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
 
     token = access_token(data={"users_id": user.id})
 
-    return {"access_token": token, "token_type":"bearer"}
+    return {"access_token": token,"token_type": "bearer"}
 
 @router.post('/email/login')
 def email_login(userdata: schema.EmailSchema, db: Session=Depends(get_db)):
@@ -38,14 +38,14 @@ def email_login(userdata: schema.EmailSchema, db: Session=Depends(get_db)):
         db.commit()
         db.refresh(new_user)
         access_token = access_token(data = {"user_id": new_user.id})
-        return {"already_exist":False, "access_token" : access_token, "token_type": "bearer"}
+        return {"already_exist":False, "access_token" : access_token,"token_type" : "bearer"}
     user_profile = db.query(User).filter(User.id==user.id).first()
     if not user_profile:
         access_token = access_token(data = {"user_id": user.id})
-        return {"already_exist":False, "access_token" : access_token, "token_type": "bearer"}
+        return {"already_exist":False, "access_token" : access_token}
 
     access_token = access_token(data = {"user_id": user.id})
-    return {"already_exist":True, "access_token" : access_token, "token_type": "bearer"}
+    return {"already_exist":True, "access_token" : access_token}
 
 @router.post("/send-reset")
 async def reset_password(userdata: schema.UserCreate,db: Session=Depends(get_db)):

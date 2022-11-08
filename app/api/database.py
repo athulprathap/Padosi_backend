@@ -12,7 +12,7 @@ from starlette.config import Config
 def setting():
     return config.Settings()
 
-# SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
+# SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:password@localhost:5432/padosii_dev"
 def database_pgsql_url_config():
     return str (setting().DB_CONNECTION + "://" + setting().DB_USERNAME + ":" + setting().DB_PASSWORD +
                "@" + setting().DB_HOST + ":" + setting().DB_PORT + "/" + setting().DB_DATABASE)

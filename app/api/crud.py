@@ -6,7 +6,8 @@ from app.api.database import get_db
 from typing import Optional, Dict
 from . import schema
 from sqlalchemy import func
-from .model import Post,Like,User
+from .model import Post,Like,User,urgent_alerts
+from .database import database
 from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse
 from sqlalchemy.orm import relationship
 # from . import dbmanager,FCMmanager
@@ -49,6 +50,9 @@ def like_unlike(db: Session , like: Likes,  user: int):
     
        return isLiked 
 
+def deactivate_user(current_user: schema.UserList):
+    query = "UPDATE my_users SET status='0' WHERE status='1' and email=:email"
+    return database.execute(query, values= {"email": current_user.email})
 
 # Get a post
 def singlePost(id:int, db:Session):
@@ -111,9 +115,69 @@ def update_user(db: Session,  user: User, id: int, values: Dict={}):
 
 def deactivate_user(current_user: schema.UserList):
     query = "UPDATE my_users SET status='0' WHERE status='1' and email=:email"
-    return get_db.execute(query, values= {"email": current_user.email})
+    return database.execute(query, values= {"email": current_user.email})
 
+# Get only my alert
 
+def personal_alert(db: Session, user:int):
+    owner_urgent_alert = db.query(urgent_alerts).filter(urgent_alerts.user_id == user.id).all()
+    return  owner_urgent_alert
+    
+    
+# Create a new alert
+def create_alert(alert:schema.urgent_alerts, db: Session, user: int):
+    newalert = urgent_alerts( title=alert.title, content=alert.content, published=alert.published, user=user)
+    
+    db.add(newalert)
+    db.commit()
+    db.refresh(alert)
+    
+    return alert
+
+def get_urgent_alerts_by_id(id:int, db:Session, user:int):
+    alert=db.query(urgent_alerts).filter(urgent_alerts.id==id)
+    return alert
+
+def get_total_urgent_alerts(id:int, db:Session, user:list):
+    alert=[get_others_urgent_alert(id=id,db=db,user=neighbour_user)]
+    return len(alert)
+
+#get neighbour user
+def neighbour_user(db:Session,pincode:int):
+    neighbour=neighbour_user(db=db,pincode=pincode)
+    return [neighbour]
+    
+
+#Get post of others
+def get_others_urgent_alert(id:int, db:Session, user:int):
+    alert=[get_urgent_alerts_by_id(id=id,db=db,user=neighbour_user)]
+    return alert
+    
+
+# Delete a latest alert
+def delete_alert(id: int, db: Session, user:int):
+
+    deleted_alert = db.query(urgent_alerts).filter(urgent_alerts == id)
+    
+    alert = deleted_alert.first()
+ 
+    deleted_alert.delete()
+    db.commit()
+
+    return alert
+
+# Edit/Update a urgent alert
+def update_alert(id:int, alert:schema.Createalert, db: Session , values: Dict={}):
+
+    editedalert = db.query(urgent_alerts).filter(urgent_alerts.id == id)
+    
+    editedalert.update(values)
+    db.commit()
+
+    return editedalert.first()
+
+def respond_to_alert(id:int, user:int, alert:schema.urgent_alerts):
+    pass
 
 # async def save(user_device: UserDevicePayload) -> Dict:
 #     last_record_id = await dbmanager.save(user_devices, user_device)
