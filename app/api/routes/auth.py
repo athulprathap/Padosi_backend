@@ -5,7 +5,7 @@ from ..model import User
 from ..schema import Token
 from .. import  utils, schema
 from ..database import get_db
-from .. utils import random_with_N_digits, send_otp_mail
+from .. utils import random_with_N_digits
 from app.api.routes.otp import send_mail
 from  ..oauth2 import get_current_user,get_current_active_user,access_token
 
@@ -65,18 +65,18 @@ async def reset_password(userdata: schema.UserCreate,db: Session=Depends(get_db)
             detail="User not found")
 
 
-# @router.post("/set-password")
-# def set_password(userdata:schema.SetPassword, db: Session=Depends(get_db)):
-#     user_query = db.query(User).filter(
-#         User.username == userdata.email,
-#         User.passcode == userdata.passcode,
-#         User.is_deleted == False)
-#     user = user_query.first()
-#     if user:
-#         password = utils.hash(userdata.password)
-#         user_query.update({"password":password})
-#         db.commit()
-#         return {"message":"success"}
-#     raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, 
-#             detail="User not found")
+@router.post("/set-password")
+def set_password(userdata:schema.SetPassword, db: Session=Depends(get_db)):
+    user_query = db.query(User).filter(
+        User.username == userdata.email,
+        User.passcode == userdata.passcode,
+        User.is_deleted == False)
+    user = user_query.first()
+    if user:
+        password = utils.hash(userdata.password)
+        user_query.update({"password":password})
+        db.commit()
+        return {"message":"success"}
+    raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="User not found")

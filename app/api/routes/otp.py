@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse
 from pydantic import EmailStr, BaseModel
 from typing import List
 from app.api.utils import random_with_N_digits
-from app.api.utils import conf
+from app.api.utils import Config
 from .. import schema
 from .dynamic_link import DynamicLinks
 import requests

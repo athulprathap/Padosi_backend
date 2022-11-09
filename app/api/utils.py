@@ -1,5 +1,6 @@
 from passlib.context import CryptContext
 import string
+from fastapi import status, HTTPException, Depends, APIRouter
 from starlette.config import Config
 from random import choice
 from twilio.rest import Client
@@ -52,12 +53,11 @@ conf = ConnectionConfig(
     MAIL_FROM = config("MAIL_FROM"),
     MAIL_PORT = config("MAIL_PORT"),
     MAIL_SERVER = config("MAIL_SERVER"),
-    MAIL_STARTTLS = config("MAIL_STARTTLS"),
-    MAIL_SSL_TLS = config("MAIL_SSL_TLS"),
-    #MAIL_TLS = config("MAIL_TLS"),
-    #MAIL_SSL = config("MAIL_SSL"),
+    MAIL_TLS = config("MAIL_TLS"),
+    MAIL_SSL = config("MAIL_SSL"),
     USE_CREDENTIALS = config("USE_CREDENTIALS"),
     VALIDATE_CERTS = config("VALIDATE_CERTS")
+    # VALIDATE_CERTS = config("VALIDATE_CERTS")
 )
 
 async def send_email(otp,subject: str, recipients: list, message: str):
