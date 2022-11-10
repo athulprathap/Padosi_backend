@@ -32,16 +32,20 @@ def get_search_by_me(db: Session = Depends(database.get_db), current_user: int =
 @router.post("/popular_search")
 def popular_search(search:schema.Search, db: Session = Depends(database.get_db)):
     popular=model.Popular_search(Popular_search=search.recent_search)
-    db.add(popular)
+    if popular==model.Popular_search.Popular_search:
+       create= model.Popular_search.counter = +1
+    else:
+        create=model.Popular_search(Popular_search=search.recent_search)
+    db.add(create)
     db.commit()
-    db.refresh(popular)
+    db.refresh(create)
 
-    return popular
+    return create
 
-# @router.get("/popular_searches")
-# def get_search_by_me(db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
-#     popular = db.query(model.Popular_search).filter(model.Popular_search.Popular_search).count(max).all()
-#     if not popular:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-#                             detail=f"No search to show")
-#     return {"results":popular}
+@router.get("/popular_searches")
+def get_search_by_me(db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
+    popular = db.query(model.Popular_search).filter(model.Popular_search.Popular_search).count(max).all()
+    if not popular:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"No search to show")
+    return {"results":popular}

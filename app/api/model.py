@@ -203,6 +203,7 @@ class Search(Base):
 
 class Popular_search(Base):
     __tablename__= 'popular_search'
+    counter = Column(Integer)
     id = Column(Integer, primary_key=True, nullable=False)
     Popular_search = Column((String),nullable=True)
 
