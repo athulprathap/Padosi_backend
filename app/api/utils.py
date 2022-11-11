@@ -14,7 +14,6 @@ from starlette.config import Config
 from app.api.schema import UserDevicePayload, MessagePayload
 # from .crud import save,send
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -53,11 +52,6 @@ conf = ConnectionConfig(
     MAIL_FROM = config("MAIL_FROM"),
     MAIL_PORT = config("MAIL_PORT"),
     MAIL_SERVER = config("MAIL_SERVER"),
-    MAIL_TLS = config("MAIL_TLS"),
-    MAIL_SSL = config("MAIL_SSL"),
-    # USE_CREDENTIALS = config("USE_CREDENTIALS"),
-    # VALIDATE_CERTS = config("VALIDATE_CERTS")
-    # VALIDATE_CERTS = config("VALIDATE_CERTS")
 )
 
 async def send_email(otp,subject: str, recipients: list, message: str):
