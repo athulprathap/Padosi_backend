@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from app.api.database import get_db
 from typing import Optional, Dict
-from . import schema
+from app.api import schema
 from sqlalchemy import func
 from .model import Post,Like,User,urgent_alerts
 from .database import database
-from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse
+from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse,admin
 from sqlalchemy.orm import relationship
 # from . import dbmanager,FCMmanager
 
@@ -19,7 +19,7 @@ def personal_post(db: Session, user:int):
 
 
 # Create a post
-def create(post:Post, db: Session, user: int):
+def create(post:schema.Post, db: Session, user: int):
     newPost = Post( title=post.title, content=post.content, published=post.published, user=user)
     
     db.add(newPost)
@@ -39,7 +39,7 @@ def allPost(db: Session, limit:int = 9, skip:int = 0, option: Optional[str] = ""
 
 
     # Like and Unlike a post
-def like_unlike(db: Session , like: Likes,  user: int):
+def like_unlike(db: Session , like: schema.Likes,  user: int):
         
        query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == user.id)
        
@@ -87,8 +87,16 @@ def update(id:int, post:CreatePost, db: Session , values: Dict={}):
     return editedPost.first()
 
 
-def create_user(user: CreateUser, db: Session,):
+def create_user(user: schema.CreateUser, db: Session):
     newUser = User(username=user.username, email=user.email, password=user.password)
+    db.add(newUser)
+    db.commit()
+    db.refresh(newUser)
+
+    return newUser
+
+def admin_create_user(user: admin, db: Session,):
+    newUser = User(username=user.username, email=user.email, password=user.password,is_admin=True)
     db.add(newUser)
     db.commit()
     db.refresh(newUser)

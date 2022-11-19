@@ -23,6 +23,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     is_admin = Column(Boolean, server_default="FALSE", nullable=False)
     password = Column(String, nullable=False)
+    is_blocked = Column(Boolean, server_default="FALSE", nullable=False)
     is_deleted = Column(Boolean, server_default="FALSE", nullable=False)
     # passcode = Column(String, nullable=True)  # used for forgot user
     # passcode_expiry_time = Column(TIMESTAMP(timezone=True), nullable=True)
@@ -33,12 +34,12 @@ class Address(Base):
     __tablename__ = 'address' 
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    housenumber: String = Column(String)
-    apartment: String = Column(String)
-    city: String = Column(String)
-    area: String = Column(String)
-    pincode: Integer = Column(Integer)
-    state: String=Column(String)
+    housenumber = Column(String)
+    apartment = Column(String)
+    city = Column(String)
+    area = Column(String)
+    pincode = Column(Integer, nullable=False)
+    state = Column(String)
     latitude = Column(Numeric, nullable=True)
     longitude = Column(Numeric, nullable=True)
     user: relationship('User', back_populates='address')
@@ -65,20 +66,6 @@ class respond_to_alerts(Base):
     id=Column(Integer, ForeignKey("urgent_alerts.id", ondelete="CASCADE"),primary_key=True)
     respond=Column(String, nullable=False)
 
-
-class UserRecommadation(Base):
-    __tablename__ = "user_recommmandations"
-
-    id = Column(Integer, primary_key=True, nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    self_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    status = Column(
-        String,
-        Enum("L", "U", "PENDING", "MAYBE", name="status"),
-        nullable=False,
-        default="PENDING",
-    )
-
 class ReportUser(Base, BaseModel):
     __tablename__ = "report_users"
 
@@ -86,7 +73,15 @@ class ReportUser(Base, BaseModel):
     reported_by = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     reported_to = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     message = Column(String, nullable=False)
-    viewed = Column(Boolean, server_default="FALSE", nullable=False)
+
+class ReportPosts(Base, BaseModel):
+    __tablename__ = "report_posts"
+
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"))
+    reported_by = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    message = Column(String, nullable=False)
+    count = Column(Integer,nullable=True)
 
 class Vote(Base):
     __tablename__ = "votes"
@@ -207,3 +202,22 @@ class Popular_search(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     Popular_search = Column((String),nullable=True)
 
+class ChangeAddress(Base):
+    __tablename__ = 'changeaddress'
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey(
+        "users.id", ondelete="CASCADE"))
+    message = Column(String,nullable=True)
+    status = Column(String, Enum("Pending","Rejected","Resolved", name = "status"),nullable = False, default="Pending")
+    change_city = Column(String,nullable = False)
+    change_area = Column(String, nullable = False)
+    allowance = Column(Boolean, server_default="FALSE", nullable=False)
+
+# class AdminPermision(Base):
+#     __tablename__ = "admin_permision"
+#     id = Column(Integer, primary_key=True, nullable=False)
+#     user_id = Column(Integer, ForeignKey(
+#         "users.id", ondelete="CASCADE"))
+#     change_id = Column(Integer, ForeignKey(
+#         "changeaddress.id", ondelete="CASCADE"))
+#     allowance = Column(Boolean, server_default="FALSE", nullable=False)

@@ -17,6 +17,13 @@ class User(BaseModel):
 class CreateUser(User):
      pass
  
+class admin(BaseModel):
+    username: str 
+    email: str
+    password: constr(min_length=6, max_length=30)
+    # image: str
+    created_at = datetime 
+    is_admin = str
 
 class UserOpt(BaseModel):  #(this only returns listed fields for User)
     id: int
@@ -149,18 +156,33 @@ class address(BaseModel):
     area: str
     pincode: int
     state: str
+    class Config:
+        orm_mode = True
+class addressCreate(address):
+    pass
+
+class UserEdit(address):
+    id: int
+
+    class Config:
+        orm_mode = True
 
 class Vote(BaseModel):
     post_id: int
     dir: conint(le=1)
 
 class BlockedUser(BaseModel):
-    user_id: int
-
+    is_blocked:str
 
 class ReportUser(BaseModel):
     user_id: int
     message: str
+    # viewed: bool
+
+class Reportpost(BaseModel):
+    message: str
+    post_id: int
+    count:int
     # viewed: bool
     
 class DeviceToken(BaseModel):
@@ -231,4 +253,10 @@ class Search(BaseModel):
     class Config():
         orm_mode=True
 
+class ChangeAddress(BaseModel):
+    message:str
+    channge_city: str
+    chnage_area: str
 
+class AdminPermission(BaseModel):
+    allowance: str

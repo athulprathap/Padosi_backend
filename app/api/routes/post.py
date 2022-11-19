@@ -2,6 +2,7 @@ from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from ..modules.postRepository import create_post, myPost, get_all_post, single_Post, updatePost, delete_post, reactions
 from ..schema import Post, PostAll, PostOpt, CreatePost, Likes
 from typing import  List
+from app.api import model,schema
 from sqlalchemy.orm import Session
 from  ..database import get_db
 from  ..oauth2 import get_current_user,get_current_active_user
@@ -49,3 +50,19 @@ async def delete_Post(id: int, db: Session = Depends(get_db), user: int = Depend
 @router.put("/edit/{id}",  response_model=PostOpt)
 async def editPost(id:int, post:CreatePost, db: Session = Depends(get_db), user: int = Depends(get_current_user)):
     return updatePost(id=id, post=post, user=user, db=db, values=dict(post))
+
+@router.post("/report_post")
+def report_post(report_post: schema.Reportpost, db: Session = Depends(get_db),
+    current_user: int = Depends(get_current_user)):
+
+    report = model.ReportPosts(post_id=report_post.post_id, reported_by=current_user.id, message=report_post.message,count= +1)
+
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    
+    if not report:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Please try again")
+
+    return report
