@@ -22,9 +22,9 @@ async def register(user:User, db:Session = Depends(get_db)):
     return register_new(db=db, user=user)
 
 
-@router.get("/users/{id}", response_model=UserOpt)
-async def get_user(id:int, db: Session = Depends(get_db), account_owner: int = Depends(get_current_user)):
-    user = singleUser(id=id, db=db)
+@router.get("/users", response_model=UserOpt)
+async def get_user(db: Session = Depends(get_db), account_owner: int = Depends(get_current_user)):
+    user = db.query(model.User).filter(model.User.id == account_owner.id).first()
     if user is None:
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User not found!")
     return user
