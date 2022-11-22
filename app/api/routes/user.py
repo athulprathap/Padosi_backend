@@ -9,6 +9,9 @@ from ..database import get_db
 from ..modules.userRepository import register_new, updateUser,singleUser
 from ..schema import UserOpt,  User, UserUpdate
 import os
+from pyexpat import model
+from .. import model, schema, utils, oauth2
+from .. utils import send_otp_mail, random_with_N_digits, operation_after_block
 
 
 router = APIRouter( tags = ['Users'])
@@ -148,6 +151,90 @@ def update_address(id:int,add: schema.addressCreate, db: Session = Depends(get_d
         return change_address
     raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
     detail=f"pls contact admin")
+
+
+
+@router.post("/otp")
+async def send_otp(userdata: schema.UserCreate, db: Session = Depends(get_db)):
+    user_query = db.query(model.User).filter(model.User.email == userdata.email)
+    # temp base set password 123456
+    otp = str(random_with_N_digits(6))
+    password = utils.hash(otp)
+    status = send_otp_mail(userdata.email, otp)
+    profile_exist = False
+    user = user_query.first()
+    if user:
+        user_query.update({"password": password})
+        db.commit()
+        profile_data = db.query(model.UserProfile).filter(model.UserProfile.user_id==user.id).first()
+        if profile_data:
+            profile_exist = True
+        return {
+        "user_id": user.id,
+        "profile_exist": profile_exist
+        }
+
+    new_user = model.User(**userdata.dict(),username=userdata.email, password=password)
+    # adding user to the database
+    db.add(new_user)
+    db.commit()
+    return {
+        "user_id": new_user.id,
+        "profile_exist": profile_exist
+        }
+
+
+
+@router.get("/getcurrent_user",response_model=schema.User)
+def get_user(db: Session = Depends(get_db),
+            current_user: int = Depends(oauth2.get_current_user)):
+    return current_user
+
+
+# @router.post("/block_user")
+# def block_user(blocked: schema.BlockedUser, db: Session = Depends(get_db),
+#     current_user: int = Depends(oauth2.get_current_user)):
+#     already_blocked = db.query(models.BlockUser).filter(
+#         models.BlockUser.blocked_user == blocked.user_id,
+#         models.BlockUser.blocker_user == current_user.id).first()
+
+#     if already_blocked:
+#         return "Already Blocked"
+
+#     status = operation_after_block(db, current_user.id, blocked.user_id)
+#     if status:
+#         block_obj = model.BlockUser(blocked_user=blocked.user_id, blocker_user=current_user.id)
+#         db.add(block_obj)
+#         db.commit()
+#         db.refresh(block_obj)
+#         return block_obj
+#     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#                         detail="Please try again")
+
+
+# @router.delete("/unblock_user")
+# def unblock_user(blocked: schemas.BlockedUser, db: Session = Depends(get_db),
+#     current_user: int = Depends(oauth2.get_current_user)):
+
+#     blocked_query = db.query(models.BlockUser).filter(
+#         models.BlockUser.blocked_user == blocked.user_id,
+#         models.BlockUser.blocker_user == current_user.id)
+
+#     if blocked_query.first():
+#         blocked_query.delete()
+#         db.commit()
+#         return "unblocked"
+#     else:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
+# @router.post("/report_user")
+# def report_user(report_user: schemas.ReportUser, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+#     report = models.ReportUser(reported_to=report_user.user_id,reported_by=current_user.id, message=report_user.message)
+#     db.add(report)
+#     db.commit()
+#     db.refresh(report)
+#     return report
 
 
 
