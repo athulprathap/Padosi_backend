@@ -4,9 +4,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from app.api.database import get_db
 from typing import Optional, Dict
-from app.api import schema
+from app.api import schema,model
 from sqlalchemy import func
-from .model import Post,Like,User,urgent_alerts
 from .database import database
 from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse,admin
 from sqlalchemy.orm import relationship
@@ -14,13 +13,13 @@ from sqlalchemy.orm import relationship
 
 
 def personal_post(db: Session, user:int):
-    owner_post = db.query(Post).filter(Post.user_id == user.id).all()
+    owner_post = db.query(model.Post).filter(model.Post.user_id == user.id).all()
     return  owner_post
 
 
 # Create a post
 def create(post:schema.Post, db: Session, user: int):
-    newPost = Post( title=post.title, content=post.content, published=post.published, user=user)
+    newPost = model.Post( title=post.title, content=post.content, published=post.published, user=user)
     
     db.add(newPost)
     db.commit()
@@ -32,16 +31,16 @@ def create(post:schema.Post, db: Session, user: int):
 # Get all post
 def allPost(db: Session, limit:int = 9, skip:int = 0, option: Optional[str] = ""):
     # join tables and get the results
-    allPost  = db.query(Post, func.count(Like.post_id).label("likes")).join(Like, Like.post_id == Post.id,
-            isouter=True).group_by(Post.id).filter(Post.title.contains(option)).limit(limit).offset(skip).all()
+    allPost  = db.query(model.Post, func.count(model.Like.post_id).label("likes")).join(model.Like, model.Like.post_id == model.Post.id,
+            isouter=True).group_by(model.Post.id).filter(model.Post.title.contains(option)).limit(limit).offset(skip).all()
         
-    return allPost 
+    return allPost
 
 
     # Like and Unlike a post
 def like_unlike(db: Session , like: schema.Likes,  user: int):
         
-       query_like = db.query(Like).filter(Like.post_id == like.post_id, Like.user_id == user.id)
+       query_like = db.query(model.Like).filter(model.Like.post_id == like.post_id, Like.user_id == user.id)
        
        isLiked = query_like.first()
        
@@ -57,8 +56,8 @@ def deactivate_user(current_user: schema.UserList):
 # Get a post
 def singlePost(id:int, db:Session):
     
-    single_post = db.query(Post, func.count(Like.post_id).label("likes")).join(Like,
-                 Like.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.id == id).first()
+    single_post = db.query(model.Post, func.count(model.Like.post_id).label("likes")).join(model.Like,
+                 model.Like.post_id == Post.id, isouter=True).group_by(model.Post.id).filter(model.Post.id == id).first()
 
     return single_post
     
@@ -66,7 +65,7 @@ def singlePost(id:int, db:Session):
 # Delete a Post
 def delete(id: int, db: Session, user:int):
 
-    deleted_post = db.query(Post).filter(Post.id == id)
+    deleted_post = db.query(model.Post).filter(model.Post.id == id)
     
     post = deleted_post.first()
  
@@ -77,9 +76,9 @@ def delete(id: int, db: Session, user:int):
 
 
 # Edit/Update a Post
-def update(id:int, post:CreatePost, db: Session , values: Dict={}):
+def update(id:int, post:schema.CreatePost, db: Session , values: Dict={}):
 
-    editedPost = db.query(Post).filter(Post.id == id)
+    editedPost = db.query(model.Post).filter(model.Post.id == id)
     
     editedPost.update(values)
     db.commit()
