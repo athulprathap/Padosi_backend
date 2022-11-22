@@ -6,6 +6,7 @@ from app.api.database import get_db
 from typing import Optional, Dict
 from app.api import schema,model
 from sqlalchemy import func
+from .model import Post,Like,User,urgent_alerts
 from .database import database
 from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse,admin
 from sqlalchemy.orm import relationship

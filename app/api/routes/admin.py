@@ -14,6 +14,8 @@ router = APIRouter(
     tags=['Admin-App']
 )
 
+
+
 @router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=UserOpt)
 async def register(user:User, db:Session = Depends(get_db)):
     
