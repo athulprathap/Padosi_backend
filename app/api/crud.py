@@ -3,9 +3,12 @@ from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from app.api.database import get_db
-from typing import Optional, Dict
+from typing import Optional, Dict,List,Mapping
+import json
+from fastapi import FastAPI, Response,HTTPException
 from app.api import schema,model
 from sqlalchemy import func
+from app.api import dbmanager,FCMmanager
 from .model import Post,Like,User,urgent_alerts
 from .database import database
 from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse,admin
@@ -187,51 +190,51 @@ def update_alert(id:int, alert:schema.Createalert, db: Session , values: Dict={}
 def respond_to_alert(id:int, user:int, alert:schema.urgent_alerts):
     pass
 
-# async def save(user_device: UserDevicePayload) -> Dict:
-#     last_record_id = await dbmanager.save(user_devices, user_device)
+async def save(user_device: UserDevicePayload) -> Dict:
+    last_record_id = await dbmanager.save(user_devices, user_device)
 
-#     return {**user_device.dict(), "id": last_record_id}
-
-
-# async def get_tokens(user_id) -> List[Mapping]:
-#     tokens = await dbmanager.get_tokens(user_devices, user_id)
-
-#     return tokens
+    return {**user_device.dict(), "id": last_record_id}
 
 
-# async def send(message: MessagePayload) -> Response:
-#     tokens = await get_tokens(message.user_id)
-#     converted_tokens = [value for (value,) in tokens]
+async def get_tokens(user_id) -> List[Mapping]:
+    tokens = await dbmanager.get_tokens(user_devices, user_id)
 
-#     if len(converted_tokens) == 0:
-#         raise HTTPException(status_code=404,
-#                             detail=f'user id {message.user_id} don\'t have any registered device(s)')
+    return tokens
 
-#     batch_response = FCMmanager.send(message.message,
-#                                   message.notify.get("title"),
-#                                   message.notify.get("body"),
-#                                   converted_tokens
-#                                   )
-#     errors_lst = []
-#     for v in batch_response.responses:
-#         if v.exception:
-#             error = {}
-#             cause_resp = v.exception.__dict__.get("_cause").__dict__
-#             cause_dict = json.loads(cause_resp.get("content").decode('utf-8'))
-#             # Preparing custom error response list
-#             error["status"] = cause_dict.get("error").get("status", None)
-#             error["code"] = cause_dict.get("error").get("code", None)
-#             error["error_code"] = cause_dict.get("error").get("details")[0].get('errorCode', None)
-#             error["cause"] = cause_dict.get("error").get("message", None)
-#             errors_lst.append(error)
 
-#     resp = Response(
-#         success_count=batch_response.success_count,
-#         message=f"sent message to {batch_response.success_count} device(s)",
-#         error=ErrorResponse(
-#             count=batch_response.failure_count,
-#             errors=errors_lst
-#         )
-#     )
+async def send(message: MessagePayload) -> Response:
+    tokens = await get_tokens(message.user_id)
+    converted_tokens = [value for (value,) in tokens]
 
-#     return resp
+    if len(converted_tokens) == 0:
+        raise HTTPException(status_code=404,
+                            detail=f'user id {message.user_id} don\'t have any registered device(s)')
+
+    batch_response = FCMmanager.send(message.message,
+                                  message.notify.get("title"),
+                                  message.notify.get("body"),
+                                  converted_tokens
+                                  )
+    errors_lst = []
+    for v in batch_response.responses:
+        if v.exception:
+            error = {}
+            cause_resp = v.exception.__dict__.get("_cause").__dict__
+            cause_dict = json.loads(cause_resp.get("content").decode('utf-8'))
+            # Preparing custom error response list
+            error["status"] = cause_dict.get("error").get("status", None)
+            error["code"] = cause_dict.get("error").get("code", None)
+            error["error_code"] = cause_dict.get("error").get("details")[0].get('errorCode', None)
+            error["cause"] = cause_dict.get("error").get("message", None)
+            errors_lst.append(error)
+
+    resp = Response(
+        success_count=batch_response.success_count,
+        message=f"sent message to {batch_response.success_count} device(s)",
+        error=ErrorResponse(
+            count=batch_response.failure_count,
+            errors=errors_lst
+        )
+    )
+
+    return resp

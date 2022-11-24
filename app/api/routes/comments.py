@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_post(comment: schema.CreateComment, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
+def create_comment(comment: schema.CreateComment, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
 
     post = db.query(model.Post).filter(
         model.Post.id == comment.post_id).first()

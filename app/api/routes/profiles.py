@@ -324,8 +324,7 @@ REGION_NAME='ap-south-1'
 #     return result_dict
 
 @router.get("/all-delails/{user_id}")
-def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user)):
+def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db)):
 
     profile = db.query(model.UserProfile).filter(
         model.UserProfile.user_id==user_id,
@@ -335,12 +334,19 @@ def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db),
     #     model.Image.user_id == user_id,
     #     model.Image.is_deleted == False).all()
 
-    post = db.query(model.Post).filter(
+    post = db.query(model.Post, func.count(model.Like.post_id).label("likes")).join(model.Like, model.Like.post_id == model.Post.id,
+            isouter=True).group_by(model.Post.id).filter(
         model.Post.user_id==user_id,
         model.Post.is_deleted==False).all()
 
+    comments = db.query(model.Comment).filter(
+        model.Comment.user_id == user_id
+    )
+
+    # query_like = db.query(model.Like).filter(model.Like.post_id == post,user_id)
+
     address = db.query(model.Address).filter(
-        model.Address.user_id==user_id).first()
+        model.Address.user_id==user_id).all()
 
     # comment = db.query(model.Comment).filter(
     #     model.Comment.user_id==user_id).first()
@@ -366,7 +372,8 @@ def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db),
     result_dict["user_profile"] = profile
     result_dict["posts"] = post
     result_dict["Address"] = address
-    # result_dict["images"] = images
+    result_dict["comment"] = comments
+
     return result_dict
 
 @router.get("/all-delails-current-user")

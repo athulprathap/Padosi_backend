@@ -3,7 +3,7 @@ from enum import unique
 import json
 from typing import Sequence
 from requests import session
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, Numeric, DateTime,Sequence,ARRAY
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, Numeric, DateTime,Sequence,ARRAY,JSON
 from sqlalchemy.orm import relationship
 from .database import Base
 import datetime
@@ -199,13 +199,13 @@ class DeviceToken(Base,BaseModel):
 
 
 
-# class user_devices(Base,BaseModel):
-#     __tablename__ = "user_devices"
+class user_devices(Base,BaseModel):
+    __tablename__ = "user_devices"
 
-#     id = Column(Integer, primary_key=True, nullable=False, index=True)
-#     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-#     token = Column(String(255),unique=True, nullable=False)
-#     device_info = Column(json, nullable=True)
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    token = Column(String(255),unique=True, nullable=False)
+    device_info = Column(JSON, nullable=True)
 
 class Event(Base):
     __tablename__ = "events"

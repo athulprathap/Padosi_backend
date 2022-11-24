@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     aws_access_key_id: str
     aws_secret_key: str
     aws_s3_bucket_name: str
+    messaging_credential_path = "\padosii-2\app\serviceAccountkey.json"
 
     class Config:
         env_file = '.env'

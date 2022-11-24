@@ -4,14 +4,14 @@ from typing import List
 
 from firebase_admin import messaging, credentials, initialize_app
 
-from api.config import get_settings
+from app.api.config import settings
 
 
 logger = logging.getLogger(__name__)
 
 
 def init():
-    cred = credentials.Certificate("C:\Users\yjosh\OneDrive\Desktop\one world\padossii\serviceAccountKey.json")
+    cred = credentials.Certificate(cert=settings().messaging_credential_path)
     initialize_app(cred)
 
 

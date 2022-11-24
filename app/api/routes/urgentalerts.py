@@ -4,12 +4,10 @@ from app.api.crud import get_others_urgent_alert
 from app.api.crud import neighbour_user
 
 from app.api.schema import urgent_alerts
-from .. import oauth2
-from ..schema import Post, PostAll, PostOpt, CreatePost, Likes
-from sqlalchemy import func
-from ..database import get_db
-from ..modules.userRepository import register_new, singleUser, updateUser
-from ..crud import create_alert, update_alert, delete_alert,get_urgent_alerts_by_id,get_total_urgent_alerts
+from app.api import oauth2
+from app.api.schema import PostOpt
+from app.api.database import get_db
+from app.api.crud import create_alert, update_alert, delete_alert,get_urgent_alerts_by_id,get_total_urgent_alerts
 
 
 router = APIRouter(tags = ['urgent_alerts'])
@@ -31,7 +29,7 @@ async def find_urgent_alert_by_id(id:int, db:Session = Depends(get_db), user: in
     return get_urgent_alerts_by_id(id=id, db=db, user=user)
 
 @router.put("/urgent-alerts/{id}", status_code=status.HTTP_201_CREATED,  response_model=PostOpt)
-async def update_urgent_alert(id:int, alert:create_alert, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
+async def update_urgent_alert(id:int, alert:urgent_alerts, db: Session = Depends(get_db), user: int = Depends(oauth2.get_current_user)):
     return update_alert(id=id, alert=alert, user=user, db=db, values=dict(alert))
 
 @router.delete("/urgent-alerts/{id}", status_code = status.HTTP_204_NO_CONTENT)

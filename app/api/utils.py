@@ -5,6 +5,7 @@ from fastapi import status, HTTPException, Depends, APIRouter
 from random import choice
 from twilio.rest import Client
 from datetime import date, datetime
+from pyfcm import FCMNotification
 from . import model
 from app.api import config
 from datetime import datetime
@@ -14,7 +15,7 @@ from random import randint
 from starlette.responses import JSONResponse
 from starlette.config import Config
 from app.api.schema import UserDevicePayload, MessagePayload
-# from .crud import save,send
+from app.api.crud import save, send
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -144,9 +145,20 @@ async def send_mobile_otp(db, mobile_no, otp):
     if message:
         return True
     return False
-# async def register_device(user_device: UserDevicePayload):
-#     return await save(user_device)
+
+# async def push_notification(device_token, data):
+#     push_service = FCMNotification(
+#         api_key=SERVER_KEY)
+
+#     try:
+#         push_service.notify_single_device(registration_id=device_token, data_message=data)
+#         print("message sent")
+#     except:
+#         return False
+#     return True
+async def register_device(user_device: UserDevicePayload):
+    return await save(user_device)
 
 
-# async def send_message(message: MessagePayload):
-#     return await send(message)
+async def send_message(message: MessagePayload):
+    return await send(message)

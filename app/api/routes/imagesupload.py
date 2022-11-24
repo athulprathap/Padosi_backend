@@ -116,7 +116,7 @@ async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_d
 
 
 @router.put("/{image_id}", status_code=201)
-async def post_upload_profile_image(image_id:int, file_obj: UploadFile = File(...),db:Session= Depends(get_db),
+async def post_upload_image(image_id:int, file_obj: UploadFile = File(...),db:Session= Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user)):
     upload_obj = upload_file_to_bucket(s3_client=s3(),
                                        file_obj=file_obj.file,
