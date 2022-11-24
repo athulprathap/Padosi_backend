@@ -175,10 +175,10 @@ def get_otp_verify(otp_schema:schema.OtpVerify, db:Session = Depends(get_db),
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                 detail="otp has been expired !")
         if otp_schema.otp == user.passcode:
-            if (data_query.first().profile_complete_percent >= 85):
-                data_query.update({"is_verified": True, "profile_complete_percent":100},synchronize_session=False)
-            else:
-                data_query.update({"is_verified": True}, synchronize_session=False)
+            # if (data_query.first().profile_complete_percent >= 85):
+            #     data_query.update({"is_verified": True, "profile_complete_percent":100},synchronize_session=False)
+            # else:
+            #     data_query.update({"is_verified": True}, synchronize_session=False)
             db.commit()
             return {"message": "mobile number has been verified !!"}
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
@@ -277,28 +277,75 @@ REGION_NAME='ap-south-1'
 #     return result_dict
 
 
+# @router.get("/all-delails/{user_id}")
+# def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db)):
+
+#     profile = db.query(model.UserProfile).filter(
+#         model.UserProfile.user_id==user_id,
+#         model.UserProfile.is_deleted==False).first()
+
+#     images = db.query(model.Image).filter(
+#         model.Image.user_id == user_id,
+#         model.Image.is_deleted == False).all()
+
+#     posts = db.query(model.Post).filter(
+#         model.Post.user_id == user_id,
+#         model.Post.is_deleted == False
+#     ).all()
+#     post_list = []
+#     for po in posts:
+#         interest = db.query(model.Post).filter(model.Post.id == po.id).first()
+#         if interest:
+#             posts.append(interest)
+
+#     # interests_users = db.query(models.UserInterest).filter(
+#     #     models.UserInterest.user_id == user_id).all()
+#     # interests = []
+#     # for intr in interests_users:
+#     #     interest = db.query(models.Interest).filter(models.Interest.id == intr.interest_id).first()
+#     #     if interest:
+#     #         interests.append(interest)
+
+#     languages = []
+#     languages_user = db.query(model.Address).filter(
+#         model.Address.user_id == user_id).first()
+
+#     for lang in languages_user:
+#         language = db.query(model.Address).filter(model.Address.id == lang.id).all()
+#         if language:
+#             languages.append(language)
+
+
+#     result_dict = {}
+#     result_dict["user_profile"] = profile
+#     # result_dict["posts"] = post_list
+#     # result_dict["Address"] = languages
+#     # result_dict["images"] = images
+#     return result_dict
+
 @router.get("/all-delails/{user_id}")
-def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db)):
+def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user)):
 
     profile = db.query(model.UserProfile).filter(
         model.UserProfile.user_id==user_id,
         model.UserProfile.is_deleted==False).first()
 
-    images = db.query(model.Image).filter(
-        model.Image.user_id == user_id,
-        model.Image.is_deleted == False).all()
+    # images = db.query(model.Image).filter(
+    #     model.Image.user_id == user_id,
+    #     model.Image.is_deleted == False).all()
 
-    posts = db.query(model.Post).filter(
-        model.Post.user_id == user_id,
-        model.Post.is_deleted == False
-    ).all()
-    post_list = []
-    for po in posts:
-        interest = db.query(model.Post).filter(model.Post.id == po.id).first()
-        if interest:
-            posts.append(interest)
+    post = db.query(model.Post).filter(
+        model.Post.user_id==user_id,
+        model.Post.is_deleted==False).all()
 
-    # interests_users = db.query(models.UserInterest).filter(
+    address = db.query(model.Address).filter(
+        model.Address.user_id==user_id).first()
+
+    # comment = db.query(model.Comment).filter(
+    #     model.Comment.user_id==user_id).first()
+
+    # interests_users = db.query(model.UserInterest).filter(
     #     models.UserInterest.user_id == user_id).all()
     # interests = []
     # for intr in interests_users:
@@ -306,19 +353,64 @@ def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db)):
     #     if interest:
     #         interests.append(interest)
 
-    languages = []
-    languages_user = db.query(model.Address).filter(
-        model.Address.user_id == user_id).first()
+    # languages = []
+    # languages_user = db.query(models.UserLanguage).filter(
+    #     models.UserLanguage.user_id == user_id).all()
 
-    for lang in languages_user:
-        language = db.query(model.Address).filter(model.Address.id == lang.id).first()
-        if language:
-            languages.append(language)
-
+    # for lang in languages_user:
+    #     language = db.query(models.Language).filter(models.Language.id == lang.language_id).first()
+    #     if language:
+    #         languages.append(language)
 
     result_dict = {}
     result_dict["user_profile"] = profile
-    result_dict["posts"] = post_list
-    result_dict["Address"] = languages
-    result_dict["images"] = images
+    result_dict["posts"] = post
+    result_dict["Address"] = address
+    # result_dict["images"] = images
+    return result_dict
+
+@router.get("/all-delails-current-user")
+def get_all_profile_deltails(db:Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user)):
+
+    profile = db.query(model.UserProfile).filter(
+        model.UserProfile.user_id==current_user.id,
+        model.UserProfile.is_deleted==False).first()
+
+    # images = db.query(model.Image).filter(
+    #     model.Image.user_id == user_id,
+    #     model.Image.is_deleted == False).all()
+
+    post = db.query(model.Post).filter(
+        model.Post.user_id==current_user.id,
+        model.Post.is_deleted==False).all()
+
+    address = db.query(model.Address).filter(
+        model.Address.user_id==current_user.id).first()
+
+    # comment = db.query(model.Comment).filter(
+    #     model.Comment.user_id==user_id).first()
+
+    # interests_users = db.query(model.UserInterest).filter(
+    #     models.UserInterest.user_id == user_id).all()
+    # interests = []
+    # for intr in interests_users:
+    #     interest = db.query(models.Interest).filter(models.Interest.id == intr.interest_id).first()
+    #     if interest:
+    #         interests.append(interest)
+
+    # languages = []
+    # languages_user = db.query(models.UserLanguage).filter(
+    #     models.UserLanguage.user_id == user_id).all()
+
+    # for lang in languages_user:
+    #     language = db.query(models.Language).filter(models.Language.id == lang.language_id).first()
+    #     if language:
+    #         languages.append(language)
+
+    result_dict = {}
+    result_dict["user_profile"] = profile
+    result_dict["posts"] = post
+    result_dict["Address"] = address
+    # result_dict["images"] = images
     return result_dict

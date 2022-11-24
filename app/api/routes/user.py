@@ -75,33 +75,33 @@ def change_address(user: schema.ChangeAddress, db: Session = Depends(get_db), cu
 
     return address
 
-@router.patch("/user/upload-profile-image")
-async def upload_profile_image(
-    file: UploadFile = File(...),
-    currentUser: schema.UserList = Depends(get_current_active_user)
-):
-    try:
-        cwd = os.getcwd()
-        path_image_dir = "upload-images/user/profile/"+str(currentUser.id) + "/"
-        full_image_path = os.path.join(cwd, path_image_dir, file.filename)
+# @router.patch("/user/upload-profile-image")
+# async def upload_profile_image(
+#     file: UploadFile = File(...),
+#     currentUser: schema.UserList = Depends(get_current_active_user)
+# ):
+#     try:
+#         cwd = os.getcwd()
+#         path_image_dir = "upload-images/user/profile/"+str(currentUser.id) + "/"
+#         full_image_path = os.path.join(cwd, path_image_dir, file.filename)
 
-        # Create directory if not exist
-        if not os.path.exists(path_image_dir):
-            os.mkdir(path_image_dir)
+#         # Create directory if not exist
+#         if not os.path.exists(path_image_dir):
+#             os.mkdir(path_image_dir)
 
-        # Rename file
-        file_name = full_image_path.replace(file.filename, "profile.png")
+#         # Rename file
+#         file_name = full_image_path.replace(file.filename, "profile.png")
 
-        # Write file
-        with open(file_name, 'wb+') as f:
-            f.write(file.file.read())
-            f.flush()
-            f.close()
+#         # Write file
+#         with open(file_name, 'wb+') as f:
+#             f.write(file.file.read())
+#             f.flush()
+#             f.close()
 
-        return {"profile_image": os.path.join(path_image_dir, "profile.png")}
+#         return {"profile_image": os.path.join(path_image_dir, "profile.png")}
 
-    except Exception as e:
-        print(e)
+#     except Exception as e:
+#         print(e)
 
 @router.delete("/user/profile")
 async def deactivate_account(

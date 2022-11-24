@@ -3,7 +3,9 @@ from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from ..model import User
 from ..schema import Token
-from .. import  utils, schema
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from .. import  utils, schema,model,oauth2
 from ..database import get_db
 # from google.oauth2 import id_token
 # from google.auth.transport import requests
@@ -28,28 +30,28 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
 
     return {"access_token": token,"token_type": "bearer"}
 
-@router.post('/email/login')
-def email_login(userdata: schema.EmailSchema, db: Session=Depends(get_db)):
-    user_query = db.query(User).filter(
-        User.username == userdata.email)
-    user = user_query.first()
+# @router.post('/email/login')
+# def email_login(userdata: schema.EmailSchema, db: Session=Depends(get_db)):
+#     user_query = db.query(User).filter(
+#         User.username == userdata.email)
+#     user = user_query.first()
 
-    if not user:
-        otp = str(random_with_N_digits(6))
-        password = utils.hash(otp)
-        new_user = User(**userdata.dict(),username=userdata.email, password=password)
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        access_token = access_token(data = {"user_id": new_user.id})
-        return {"already_exist":False, "access_token" : access_token,"token_type" : "bearer"}
-    user_profile = db.query(User).filter(User.id==user.id).first()
-    if not user_profile:
-        access_token = access_token(data = {"user_id": user.id})
-        return {"already_exist":False, "access_token" : access_token}
+#     if not user:
+#         otp = str(random_with_N_digits(6))
+#         password = utils.hash(otp)
+#         new_user = User(**userdata.dict(),username=userdata.email, password=password)
+#         db.add(new_user)
+#         db.commit()
+#         db.refresh(new_user)
+#         access_token = access_token(data = {"user_id": new_user.id})
+#         return {"already_exist":False, "access_token" : access_token,"token_type" : "bearer"}
+#     user_profile = db.query(User).filter(User.id==user.id).first()
+#     if not user_profile:
+#         access_token = access_token(data = {"user_id": user.id})
+#         return {"already_exist":False, "access_token" : access_token}
 
-    access_token = access_token(data = {"user_id": user.id})
-    return {"already_exist":True, "access_token" : access_token}
+#     access_token = access_token(data = {"user_id": user.id})
+#     return {"already_exist":True, "access_token" : access_token}
 
 @router.post("/send-reset")
 async def reset_password(userdata: schema.UserCreate,db: Session=Depends(get_db)):
@@ -172,19 +174,42 @@ def set_password(userdata:schema.SetPassword, db: Session=Depends(get_db)):
 #     return {"already_exist":True, "access_token" : access_token, "token_type": "bearer"}
 
 
-# @router.post('/google-login/swap-token', response_model=schemas.Token)
-# def google_login_swap_token(google_token: schemas.GoogleAuthToken = Depends(), db: Session=Depends(database.get_db)):
-#     try:
-#         idinfo = id_token.verify_oauth2_token(google_token.auth_token,
-#                 requests.Request(), config.setting.google_client_id)
-#     except ValueError:
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-#                 detail=f"Invalid Credentials")
-#     user = db.query(models.User).filter(
-#         models.User.email == idinfo.email,
-#         models.User.is_deleted == False).first()
-#     if not user:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-#                 detail=f"user not found")
-#     access_token = oauth2.create_access_token(data = {"user_id": user.id})
-#     return {"access_token" : access_token, "token_type": "bearer"}
+@router.get("/google/callback/")
+def authenticate(idToken: str):
+    if (len(idToken) == 0):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"ID token is required")
+
+    try:
+        userDetails = id_token.verify_oauth2_token(idToken, requests.Request(), None)
+        # userDetails = id_token.verify_token(idToken, requests.Request(), None, certs_url='https://www.googleapis.com/oauth2/v1/certs')
+        return {"details": userDetails}
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Invalid Credentials")
+
+
+@router.post('/email/login')
+def email_login(userdata: schema.UserCreate, db: Session=Depends(get_db)):
+    user_query = db.query(model.User).filter(
+        model.User.username == userdata.email,
+        model.User.is_deleted == False)
+    user = user_query.first()
+
+    if not user:
+        otp = str(random_with_N_digits(6))
+        password = utils.hash(otp)
+        new_user = model.User(**userdata.dict(),username=userdata.email, password=password)
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        access_token = oauth2.access_token(data = {"user_id": new_user.id})
+        return {"already_exist":False, "access_token" : access_token, "token_type": "bearer"}
+
+    user_profile = db.query(model.UserProfile).filter(model.UserProfile.user_id==user.id).first()
+    if not user_profile:
+        access_token = oauth2.access_token(data = {"user_id": user.id})
+        return {"already_exist":False, "access_token" : access_token, "token_type": "bearer"}
+
+    access_token = oauth2.access_token(data = {"user_id": user.id})
+    return {"already_exist":True, "access_token" : access_token, "token_type": "bearer"}

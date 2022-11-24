@@ -93,58 +93,58 @@ async def post_upload_profile_image(file_obj: UploadFile = File(...),
 
 
 
-# @router.post("", status_code=201)
-# async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_db),
-#     current_user: int = Depends(oauth2.get_current_user)):
-#     upload_obj = upload_file_to_bucket(s3_client=s3(),
-#                                        file_obj=file_obj.file,
-#                                        bucket=AWS_S3_BUCKET_NAME,
-#                                        folder=f"{current_user.id}/images",  # To Be updated
-#                                        object_name=file_obj.filename)
-#     if upload_obj:
-#         download_url = image_url_substring+f"{current_user.id}/images/" +str(file_obj.filename)
-#         download_url = download_url.split()
-#         download_url = "+".join(download_url)
-#         data = model.Image(user_id=current_user.id, image_url=download_url)
-#         db.add(data)
-#         db.commit()
-#         return JSONResponse(content="Object has been uploaded to bucket successfully",
-#                             status_code=status.HTTP_201_CREATED)
-#     else:
-#         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                             detail="File could not be uploaded")
+@router.post("", status_code=201)
+async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user)):
+    upload_obj = upload_file_to_bucket(s3_client=s3(),
+                                       file_obj=file_obj.file,
+                                       bucket=AWS_S3_BUCKET_NAME,
+                                       folder=f"{current_user.id}/images",  # To Be updated
+                                       object_name=file_obj.filename)
+    if upload_obj:
+        download_url = image_url_substring+f"{current_user.id}/images/" +str(file_obj.filename)
+        download_url = download_url.split()
+        download_url = "+".join(download_url)
+        data = model.Post(user_id=current_user.id, content=download_url)
+        db.add(data)
+        db.commit()
+        return JSONResponse(content="Object has been uploaded to bucket successfully",
+                            status_code=status.HTTP_201_CREATED)
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="File could not be uploaded")
 
 
-# @router.put("/{image_id}", status_code=201)
-# async def post_upload_profile_image(image_id:int, file_obj: UploadFile = File(...),db:Session= Depends(get_db),
-#     current_user: int = Depends(oauth2.get_current_user)):
-#     upload_obj = upload_file_to_bucket(s3_client=s3(),
-#                                        file_obj=file_obj.file,
-#                                        bucket=AWS_S3_BUCKET_NAME,
-#                                        folder=f"{current_user.id}/images",  # To Be updated
-#                                        object_name=file_obj.filename)
-#     if upload_obj:
-#         download_url = image_url_substring+f"{current_user.id}/images/" +str(file_obj.filename)
-#         download_url = download_url.split()
-#         download_url = "+".join(download_url)
-#         data_query = db.query(model.Image).filter(model.Image.id==image_id)
-#         try:
-#             data_query.update({"image_url": download_url},synchronize_session=False)
-#         except:
-#             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                                 detail="Image could not be updated")
-#         db.commit()
-#         return JSONResponse(content="Image has been updated to bucket successfully",
-#                             status_code=status.HTTP_201_CREATED)
-#     else:
-#         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                             detail="Image could not be uploaded")
+@router.put("/{image_id}", status_code=201)
+async def post_upload_profile_image(image_id:int, file_obj: UploadFile = File(...),db:Session= Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user)):
+    upload_obj = upload_file_to_bucket(s3_client=s3(),
+                                       file_obj=file_obj.file,
+                                       bucket=AWS_S3_BUCKET_NAME,
+                                       folder=f"{current_user.id}/images",  # To Be updated
+                                       object_name=file_obj.filename)
+    if upload_obj:
+        download_url = image_url_substring+f"{current_user.id}/images/" +str(file_obj.filename)
+        download_url = download_url.split()
+        download_url = "+".join(download_url)
+        data_query = db.query(model.Post).filter(model.Post.id==image_id)
+        try:
+            data_query.update({"image_url": download_url},synchronize_session=False)
+        except:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail="Image could not be updated")
+        db.commit()
+        return JSONResponse(content="Image has been updated to bucket successfully",
+                            status_code=status.HTTP_201_CREATED)
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Image could not be uploaded")
 
-# @router.get("/uploaded")
-# def uploaded_images(db:Session= Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-#     data = db.query(model.Image).filter(model.Image.user_id==current_user.id,
-#         model.Image.is_deleted==False).all()
-#     return data
+@router.get("/uploaded")
+def uploaded_images(db:Session= Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    data = db.query(model.Post).filter(model.Post.user_id==current_user.id,
+        model.Post.is_deleted==False).all()
+    return data
 
 
 # @router.delete("/image/{image_id}")
