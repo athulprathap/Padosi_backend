@@ -289,3 +289,6 @@ class Mobile(BaseModel):
 
 class OtpVerify(BaseModel):
     otp:str
+
+class PostImage(Post):
+    image: str

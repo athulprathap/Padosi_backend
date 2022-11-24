@@ -130,8 +130,9 @@ class UserProfile(Base, BaseModel):
 class Post(Base,BaseModel):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, nullable=False)
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
+    title = Column(String, nullable=True)
+    content = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
     published = Column(Boolean, server_default='TRUE', nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     user = relationship("User")

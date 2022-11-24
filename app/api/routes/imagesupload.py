@@ -105,9 +105,10 @@ async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_d
         download_url = image_url_substring+f"{current_user.id}/images/" +str(file_obj.filename)
         download_url = download_url.split()
         download_url = "+".join(download_url)
-        data = model.Post(user_id=current_user.id, content=download_url)
+        data = model.Post(user_id=current_user.id, image_url=download_url)
         db.add(data)
         db.commit()
+        db.refresh(data)
         return JSONResponse(content="Object has been uploaded to bucket successfully",
                             status_code=status.HTTP_201_CREATED)
     else:
