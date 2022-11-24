@@ -4,7 +4,6 @@ from  ..oauth2 import get_current_user,get_current_active_user
 from app.api import model,schema,crud
 from sqlalchemy import func
 from typing import Optional, Dict
-from ..utils import operation_after_block
 from ..database import get_db
 from ..modules.userRepository import register_new, updateUser,singleUser
 from ..schema import UserOpt,  User, UserUpdate
@@ -237,4 +236,31 @@ def get_user(db: Session = Depends(get_db),
 #     return report
 
 
+# @router.post("/otp")
+# async def send_otp(userdata: schema.UserCreate, db: Session = Depends(get_db)):
+#     user_query = db.query(model.User).filter(model.User.email == userdata.email)
+#     # temp base set password 123456
+#     otp = str(random_with_N_digits(6))
+#     password = utils.hash(otp)
+#     status = send_otp_mail(userdata.email, otp)
+#     profile_exist = False
+#     user = user_query.first()
+#     if user:
+#         user_query.update({"password": password})
+#         db.commit()
+#         profile_data = db.query(model.UserProfile).filter(model.UserProfile.user_id==user.id).first()
+#         if profile_data:
+#             profile_exist = True
+#         return {
+#         "user_id": user.id,
+#         "profile_exist": profile_exist
+#         }
 
+#     new_user = model.User(**userdata.dict(),username=userdata.email, password=password)
+#     # adding user to the database
+#     db.add(new_user)
+#     db.commit()
+#     return {
+#         "user_id": new_user.id,
+#         "profile_exist": profile_exist
+#         }

@@ -1,10 +1,12 @@
 from passlib.context import CryptContext
 import string
 from fastapi import status, HTTPException, Depends, APIRouter
-from starlette.config import Config
+# from starlette.config import Config
 from random import choice
 from twilio.rest import Client
+from datetime import date, datetime
 from . import model
+from app.api import config
 from datetime import datetime
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from typing import Dict, List
@@ -28,20 +30,34 @@ def random(digits: int):
     chars = string.digits
     return ''.join(choice(chars) for _ in range(digits))
 
-config = Config(".env")
+async def send_mobile_otp(db, mobile_no, otp):
+    client = Client(config.settings.twilio_account_sid, config.settings.twilio_auth_token)
+    otp = str(otp)
+    message = client.messages \
+                    .create(
+                        body="your otp for padosii is "+ otp,
+                        from_=config.settings.twilio_number,
+                        to=mobile_no
+                    )
+    if message:
+        return True
+    return False
+# async def register_dev
 
-time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# config = Config(".env")
 
-client = Client(config('account_sid'),config('auth_token'))
+# time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# send a otp to phone using twiilo 
-def OTP_send(msg, phone):
-    message = client.messages.create(
-        body=msg,
-        from_=config('my_twilio'),
-        to=phone
-    )
-    return message.sid
+# client = Client(config('account_sid'),config('auth_token'))
+
+# # send a otp to phone using twiilo 
+# def OTP_send(msg, phone):
+#     message = client.messages.create(
+#         body=msg,
+#         from_=config('my_twilio'),
+#         to=phone
+#     )
+#     return message.sid
 
 #load .env file
 config = Config(".env")
@@ -66,6 +82,10 @@ async def send_email(otp,subject: str, recipients: list, message: str):
     mail = FastMail(conf)
     await mail.send_message(message)
 
+def calculateAge(birthDate):
+	today = date.today()
+	age = today.year - birthDate.year -((today.month, today.day) < (birthDate.month, birthDate.day))
+	return age
 
 async def send_otp_mail(email, otp):
     body_message = "user otp for padosii is :" + str(otp)
@@ -112,6 +132,18 @@ async def password_reset(subject:str, email_to: str, body:Dict):
     fm =FastMail(conf)
     await fm.send_message(message, template_name="password_reset.html")
 
+async def send_mobile_otp(db, mobile_no, otp):
+    client = Client(config.settings.twilio_account_sid, config.settings.twilio_auth_token)
+    otp = str(otp)
+    message = client.messages \
+                    .create(
+                        body="your otp for padosii is "+ otp,
+                        from_=config.settings.twilio_number,
+                        to=mobile_no
+                    )
+    if message:
+        return True
+    return False
 # async def register_device(user_device: UserDevicePayload):
 #     return await save(user_device)
 

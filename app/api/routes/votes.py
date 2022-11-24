@@ -8,6 +8,18 @@ from ..database import get_db
 router = APIRouter(prefix="/vote", tags=["Vote"])
 
 
+@router.post("/create_polls",status_code=status.HTTP_201_CREATED)
+def create_polls(pol: schema.Addpolls,db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    new = model.polls(content = pol.content, option1 = pol.option1, option2 = pol.option2,
+    option3 = pol.option3, option4 = pol.option4, option6 = pol.option6, user_id = current_user.id)
+    if current_user.id:
+        db.add(new)
+        db.commit()
+        db.refresh(new)
+        return("polls create successfully")
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def vote(
     vote: schema.Vote,
@@ -15,11 +27,11 @@ def vote(
     current_user: int = Depends(get_current_user),
 ):
 
-    post = db.query(model.Post).filter(model.Post.id == vote.post_id).first()
+    post = db.query(model.polls).filter(model.polls.id == vote.post_id).first()
     if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id :{vote.post_id} does not exist",
+            detail=f"Polls with id :{vote.post_id} does not exist",
         )
 
     vote_query = db.query(model.Vote).filter(

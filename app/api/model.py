@@ -16,19 +16,22 @@ class BaseModel:
         server_default=text("now()"), onupdate=datetime.datetime.now)
     is_deleted = Column(Boolean, server_default="FALSE", nullable=False)
 
-class User(Base):
+class User(Base,BaseModel):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     is_admin = Column(Boolean, server_default="FALSE", nullable=False)
     password = Column(String, nullable=False)
+    passcode = Column(String, nullable=True)  # used for forgot user
+    passcode_expiry_time = Column(TIMESTAMP(timezone=True), nullable=True)
+    status = Column(String, Enum("ACTIVE", "SUSPEND", "DELETED",
+            name="user_status",), nullable=False, default="ACTIVE")
     is_blocked = Column(Boolean, server_default="FALSE", nullable=False)
-    is_deleted = Column(Boolean, server_default="FALSE", nullable=False)
     # passcode = Column(String, nullable=True)  # used for forgot user
     # passcode_expiry_time = Column(TIMESTAMP(timezone=True), nullable=True)
     # image = Column(String, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    profile = relationship("UserProfile", back_populates="user")
     
 class Address(Base):
     __tablename__ = 'address' 
@@ -87,17 +90,58 @@ class Vote(Base):
     __tablename__ = "votes"
 
     user_id = Column(Integer, ForeignKey("users.id",ondelete="CASCADE"),primary_key=True)
-    post_id = Column(Integer, ForeignKey("posts.id",ondelete="CASCADE"),primary_key=True)
+    poll_id = Column(Integer, ForeignKey("polls.id",ondelete="CASCADE"),primary_key=True)
 
-class Post(Base):
+class UserProfile(Base, BaseModel):
+    __tablename__ = "userprofiles"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    full_name = Column(String, nullable=False)
+    mobile = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
+    sex = Column(String, nullable=True)
+    date_of_birth = Column(DATE, nullable=True)
+    # bio = Column(String, nullable=True)
+    # birth_star = Column(String, nullable=True)
+    # education = Column(String, nullable=True)
+    # height = Column(Numeric, nullable=True)
+    # profession = Column(String, nullable=True)
+    # athnicity = Column(String, nullable=True)
+    # intension = Column(String, nullable=True)
+    # smoker = Column(Boolean, nullable=True)
+    # drink = Column(Boolean, nullable=True)
+    # marital_status = Column(String, Enum("Single","Divorced","Separated", "Annulled","Widowed",
+    #     name="marital_status"), server_default="Single", nullable=True)
+    # no_of_children = Column(Integer, nullable=True)
+    age = Column(Integer, nullable=True)
+    # profile_complete_percent = Column(Numeric, nullable=True)
+    # latitude = Column(Numeric, nullable=True)
+    # longitude = Column(Numeric, nullable=True)
+    # address = Column(String, nullable=True)
+    # is_verified = Column(Boolean, server_default="FALSE", nullable=False)
+    # selfie_verification = Column(Boolean, server_default="FALSE", nullable=False)
+    # selfie_image_url = Column(String, nullable=True)
+    name_change_date = Column(TIMESTAMP(timezone=True), nullable=False,
+        server_default=text("now()"))
+    # is_hide_profile = Column(Boolean, server_default="FALSE", nullable=False)
+    user = relationship("User", back_populates="profile")
+
+class Post(Base,BaseModel):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
     published = Column(Boolean, server_default='TRUE', nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     user = relationship("User")
+
+class Image(Base, BaseModel):
+    __tablename__ = "images"
+
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    image_url = Column(String, nullable=False)
     
 class Like(Base):
     __tablename__ = "likes"
@@ -221,3 +265,15 @@ class ChangeAddress(Base):
 #     change_id = Column(Integer, ForeignKey(
 #         "changeaddress.id", ondelete="CASCADE"))
 #     allowance = Column(Boolean, server_default="FALSE", nullable=False)
+
+class polls(Base):
+    __tablename__ = "polls"
+    id = Column(Integer, primary_key=True, nullable=False)
+    content = Column(String)
+    user_id = Column(Integer, ForeignKey(
+         "users.id", ondelete="CASCADE"),nullable = False)
+    option1=Column(String,nullable=True)
+    option2=Column(String,nullable=True)
+    option3=Column(String,nullable=True)
+    option4=Column(String,nullable=True)
+    option6=Column(String,nullable=True)

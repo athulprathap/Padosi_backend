@@ -4,6 +4,7 @@ from typing import Dict, Optional, List
 from pydantic import BaseModel, Field
 from pydantic.types import conint
 from typing import List
+from datetime import date
 
 # User models
 class User(BaseModel):
@@ -260,3 +261,31 @@ class ChangeAddress(BaseModel):
 
 class AdminPermission(BaseModel):
     allowance: str
+
+class polls(BaseModel):
+    content: str
+    option1: str
+    option2: str
+
+class Addpolls(polls):
+    option3: Optional[str]
+    option4: Optional[str]
+    option5: Optional[str]
+    option6: Optional[str]
+
+class UserProfileTwo(BaseModel):
+    sex: Optional[str]
+    date_of_birth: Optional[date]
+
+class UserProfileOne(BaseModel):
+    mobile: Optional[str]
+    # is_verified: Optional[bool]
+
+class UserProfile(UserProfileOne, UserProfileTwo):
+    full_name: str
+
+class Mobile(BaseModel):
+    mobile: str
+
+class OtpVerify(BaseModel):
+    otp:str
