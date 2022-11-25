@@ -4,24 +4,102 @@ from  ..oauth2 import get_current_user,get_current_active_user
 from app.api import model,schema,crud
 from sqlalchemy import func
 from typing import Optional, Dict
+from sqlalchemy.util import asyncio
 from ..database import get_db
 from ..modules.userRepository import register_new, updateUser,singleUser
 from ..schema import UserOpt,  User, UserUpdate
-import os
-from pyexpat import model
+from datetime import datetime, timedelta
 from .. import model, schema, utils, oauth2
-from .. utils import send_otp_mail, random_with_N_digits, operation_after_block
+from .. utils import send_otp_mail, random_with_N_digits, operation_after_block,send_mobile_otp,verify_otp
+import pytz
 
+utc = pytz.UTC
 
 router = APIRouter( tags = ['Users'])
 
 
-@router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=UserOpt)
+# @router.post("/register")
+# def user_register(user: UserRegister, db: Session = Depends(get_db)):
+#     email = db.query(models.User).filter(models.User.email == user.email).first()
+#     number = db.query(models.User).filter(models.User.number == user.number).first()
+#     if email:
+#         return HTTPException(status_code=400, detail=" Email already exist")
+#     elif number:
+#         return HTTPException(status_code=400, detail=" Number already exist")
+#     else:
+#         otp = asyncio.run(mail(user))
+#         obj = models.Otp(email=user.email, otp=otp)
+#         db.add(obj)
+#         db.commit()
+#         db.refresh(obj)
+
+#         return "otp send successfully Please Enter OTP"
+#         # password = set_password(user.password)
+#         # obj = models.User(name=user.name, number=user.number, email=user.email, address=user.address, password=password)
+#         # db.add(obj)
+#         # db.commit()
+#         # db.refresh(obj)
+#         # return "user registered Successfully"
+
+# @router.get("/otp")
+# async def get_otp(db:Session = Depends(get_db),
+#     current_user: int = Depends(oauth2.get_current_user)):
+#     # data = db.query(models.UserProfile).filter(models.UserProfile.user_id==current_user.id).first()
+#     user_query = db.query(model.User).filter(model.User.id == current_user.id)
+#     if user_query:
+#         otp = random_with_N_digits(6)
+#         await send_mobile_otp(db, user_query.mobile, otp)
+#         otp_expire = utc.localize(datetime.now() + timedelta(minutes=3))
+#         user_query.update({"passcode":otp,"passcode_expiry_time":otp_expire}, synchronize_session=False)
+#         db.commit()
+#         return {"message": "OTP has been sent!!"}
+#     return "user does not exist!"
+
+# @router.get("/otp")
+# async def get_otp(db:Session = Depends(get_db),
+#     current_user: int = Depends(oauth2.get_current_user)):
+#     data = db.query(model.UserProfile).filter(model.UserProfile.user_id==current_user.id).first()
+#     user_query = db.query(model.User).filter(model.User.id == current_user.id)
+#     if data:
+#         otp = random_with_N_digits(6)
+#         await send_mobile_otp(db, data.mobile, otp)
+#         otp_expire = utc.localize(datetime.now() + timedelta(minutes=3))
+#         user_query.update({"passcode":otp,"passcode_expiry_time":otp_expire}, synchronize_session=False)
+#         db.commit()
+#         return {"message": "OTP has been sent!!"}
+#     return "user does not exist!"
+
+# @router.post("/otp")
+# async def send_otp(userdata: schema.Usermobile,
+#                    db: Session = Depends(get_db)):
+
+#     status = await send_mobile_otp(userdata.mobile)
+    
+#     return status
+@router.post("/mobile-otp")
+async def send_otp(userdata: schema.Usermobile):
+    status = await send_mobile_otp(userdata.mobile)
+    print(status)
+    return {"response":status}
+
+@router.post("/verify-otp-register",status_code=status.HTTP_201_CREATED, response_model=schema.Registerresponse)
+async def verify_otp_resgister(user:User,db: Session = Depends(get_db)):
+    status = await verify_otp(user.mobile,user.otp)
+    if status == "approved":
+        return register_new(db=db, user=user)
+    else:
+        return ("Unable to verify OTP")
+
+
+
+
+
+@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=schema.Registerresponse)
 async def register(user:User, db:Session = Depends(get_db)):
     return register_new(db=db, user=user)
 
 
-@router.get("/users", response_model=UserOpt)
+@router.get("/users", response_model=schema.Registerresponse)
 async def get_user(db: Session = Depends(get_db), account_owner: int = Depends(get_current_user)):
     user = db.query(model.User).filter(model.User.id == account_owner.id).first()
     if user is None:
@@ -29,7 +107,7 @@ async def get_user(db: Session = Depends(get_db), account_owner: int = Depends(g
     return user
 
 
-@router.put("/users/{id}", response_model=UserOpt)
+@router.put("/users/{id}", response_model=schema.Registerresponse)
 async def editUser(id, user: UserUpdate , db:Session = Depends(get_db), account_owner: int = Depends(get_current_user)):
     my_update = updateUser(id=id, user=user, db=db, values=dict(user))
     if my_update is None:

@@ -192,18 +192,13 @@ def authenticate(idToken: str):
 @router.post('/email/login')
 def email_login(userdata: schema.UserCreate, db: Session=Depends(get_db)):
     user_query = db.query(model.User).filter(
-        model.User.username == userdata.email,
+        model.User.email == userdata.email,
         model.User.is_deleted == False)
     user = user_query.first()
 
     if not user:
-        otp = str(random_with_N_digits(6))
-        password = utils.hash(otp)
-        new_user = model.User(**userdata.dict(),username=userdata.email, password=password)
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        access_token = oauth2.access_token(data = {"user_id": new_user.id})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"User not exist")
         return {"already_exist":False, "access_token" : access_token, "token_type": "bearer"}
 
     user_profile = db.query(model.UserProfile).filter(model.UserProfile.user_id==user.id).first()

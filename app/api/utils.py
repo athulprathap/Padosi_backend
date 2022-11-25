@@ -4,10 +4,11 @@ from fastapi import status, HTTPException, Depends, APIRouter
 # from starlette.config import Config
 from random import choice
 from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
 from datetime import date, datetime
 from pyfcm import FCMNotification
 from . import model
-from app.api import config
+from app.api.config import settings
 from datetime import datetime
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from typing import Dict, List
@@ -16,6 +17,7 @@ from starlette.responses import JSONResponse
 from starlette.config import Config
 from app.api.schema import UserDevicePayload, MessagePayload
 from app.api.crud import save, send
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -133,18 +135,40 @@ async def password_reset(subject:str, email_to: str, body:Dict):
     fm =FastMail(conf)
     await fm.send_message(message, template_name="password_reset.html")
 
-async def send_mobile_otp(db, mobile_no, otp):
-    client = Client(config.settings.twilio_account_sid, config.settings.twilio_auth_token)
-    otp = str(otp)
-    message = client.messages \
-                    .create(
-                        body="your otp for padosii is "+ otp,
-                        from_=config.settings.twilio_number,
-                        to=mobile_no
-                    )
-    if message:
-        return True
-    return False
+async def send_mobile_otp(mobile_no):
+    try:
+        client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+        verify = client.verify.services(settings.twilio_verify_service_sid)
+        verify.verifications.create(to=mobile_no,channel='sms')
+        return ("OTP sent successfully")
+    except TwilioRestException as e:
+        print(e)
+        return ("Unable to send OTP")
+
+async def verify_otp(mobile_no,otp):
+    try:
+        client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+        verify = client.verify.services(settings.twilio_verify_service_sid)
+        result = verify.verification_checks.create(to=mobile_no, code=otp)
+        # return ("OTP sent successfully")
+        return (result.status)
+    except TwilioRestException as e:
+        print(e)
+        return ("Unable to verify OTP")
+
+    # client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+    # verify = client.verify.services(settings.twilio_verify_service_sid)
+    # return verify.verifications.create(to=mobile_no,channel='sms')
+    # otp = str(otp)
+    # message = client.messages \
+    #                 .create(
+    #                     body="your otp for padosii is "+ otp,
+    #                     from_=settings.twilio_number,
+    #                     to=mobile_no
+    #                 )
+    # if message:
+    #     return True
+    # return Fa
 
 # async def push_notification(device_token, data):
 #     push_service = FCMNotification(

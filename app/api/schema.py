@@ -11,6 +11,8 @@ class User(BaseModel):
     username: str 
     email: str
     password: constr(min_length=6, max_length=30)
+    mobile: str
+    otp: str
     # image: str
     created_at = datetime 
 
@@ -26,13 +28,17 @@ class admin(BaseModel):
     created_at = datetime 
     is_admin = str
 
-class UserOpt(BaseModel):  #(this only returns listed fields for User)
-    id: int
-    username: str
-    email: EmailStr
-    created_at = datetime 
-    class Config:
-        orm_mode = True
+# class UserOpt(BaseModel):  #(this only returns listed fields for User)
+#     id: int
+#     username: str
+#     email: EmailStr
+#     status: str
+#     mobile: str
+#     is_deleted:bool
+#     is_admin:bool
+#     is_blocked:bool
+#     class Config:
+#         orm_mode = True
         
 class UserUpdate(BaseModel):
     username: Optional[str]
@@ -91,6 +97,7 @@ class UserBase(BaseModel):
     password: str
     # image: str
     created_at = datetime
+    mobile: str
 
 class CreateComment(BaseModel):
     post_id: int
@@ -292,3 +299,15 @@ class OtpVerify(BaseModel):
 
 class PostImage(Post):
     image: str
+
+class Usermobile(BaseModel):
+    mobile: str
+
+class Registerresponse(UserOpt):
+    status: str
+    mobile: str
+    is_deleted:bool
+    is_admin:bool
+    is_blocked:bool
+    class Config:
+        orm_mode = True

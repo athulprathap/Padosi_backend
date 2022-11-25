@@ -91,7 +91,7 @@ def update(id:int, post:schema.CreatePost, db: Session , values: Dict={}):
 
 
 def create_user(user: schema.CreateUser, db: Session):
-    newUser = User(username=user.username, email=user.email, password=user.password)
+    newUser = User(username=user.username, email=user.email, password=user.password,mobile=user.mobile)
     db.add(newUser)
     db.commit()
     db.refresh(newUser)

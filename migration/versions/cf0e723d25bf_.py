@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 0f5efbf00b29
+Revision ID: cf0e723d25bf
 Revises: 
-Create Date: 2022-11-23 21:34:48.876830
+Create Date: 2022-11-25 13:45:19.409221
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0f5efbf00b29'
+revision = 'cf0e723d25bf'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,7 +46,7 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('is_deleted', sa.Boolean(), server_default='FALSE', nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('username', sa.String(), nullable=False),
+    sa.Column('username', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('is_admin', sa.Boolean(), server_default='FALSE', nullable=False),
     sa.Column('password', sa.String(), nullable=False),
@@ -54,6 +54,7 @@ def upgrade() -> None:
     sa.Column('passcode_expiry_time', sa.TIMESTAMP(timezone=True), nullable=True),
     sa.Column('status', sa.String(), nullable=False),
     sa.Column('is_blocked', sa.Boolean(), server_default='FALSE', nullable=False),
+    sa.Column('mobile', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -120,6 +121,17 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('images',
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), server_default='FALSE', nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('image_url', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_images_id'), 'images', ['id'], unique=False)
     op.create_table('polls',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('content', sa.String(), nullable=True),
@@ -133,11 +145,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('posts',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(), nullable=False),
-    sa.Column('content', sa.String(), nullable=False),
-    sa.Column('published', sa.Boolean(), server_default='TRUE', nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), server_default='FALSE', nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(), nullable=True),
+    sa.Column('content', sa.String(), nullable=True),
+    sa.Column('image_url', sa.String(), nullable=True),
+    sa.Column('published', sa.Boolean(), server_default='TRUE', nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -172,6 +187,19 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('user_devices',
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), server_default='FALSE', nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('token', sa.String(length=255), nullable=False),
+    sa.Column('device_info', sa.JSON(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('token')
+    )
+    op.create_index(op.f('ix_user_devices_id'), 'user_devices', ['id'], unique=False)
     op.create_table('userprofiles',
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -184,14 +212,13 @@ def upgrade() -> None:
     sa.Column('sex', sa.String(), nullable=True),
     sa.Column('date_of_birth', sa.DATE(), nullable=True),
     sa.Column('age', sa.Integer(), nullable=True),
-    sa.Column('profile_complete_percent', sa.Numeric(), nullable=True),
-    sa.Column('latitude', sa.Numeric(), nullable=True),
-    sa.Column('longitude', sa.Numeric(), nullable=True),
     sa.Column('name_change_date', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('comments',
+    sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), server_default='FALSE', nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('content', sa.String(), nullable=True),
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -209,6 +236,9 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('user_id', 'event_id')
     )
     op.create_table('likes',
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), server_default='FALSE', nullable=False),
     sa.Column('post_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ondelete='CASCADE'),
@@ -255,12 +285,16 @@ def downgrade() -> None:
     op.drop_table('eventrespond')
     op.drop_table('comments')
     op.drop_table('userprofiles')
+    op.drop_index(op.f('ix_user_devices_id'), table_name='user_devices')
+    op.drop_table('user_devices')
     op.drop_table('urgent_alerts')
     op.drop_table('search')
     op.drop_index(op.f('ix_report_users_id'), table_name='report_users')
     op.drop_table('report_users')
     op.drop_table('posts')
     op.drop_table('polls')
+    op.drop_index(op.f('ix_images_id'), table_name='images')
+    op.drop_table('images')
     op.drop_table('events')
     op.drop_index(op.f('ix_device_tokens_id'), table_name='device_tokens')
     op.drop_table('device_tokens')

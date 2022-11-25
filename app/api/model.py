@@ -19,7 +19,7 @@ class BaseModel:
 class User(Base,BaseModel):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String, nullable=False)
+    username = Column(String, nullable=True)
     email = Column(String, unique=True, nullable=False)
     is_admin = Column(Boolean, server_default="FALSE", nullable=False)
     password = Column(String, nullable=False)
@@ -28,6 +28,7 @@ class User(Base,BaseModel):
     status = Column(String, Enum("ACTIVE", "SUSPEND", "DELETED",
             name="user_status",), nullable=False, default="ACTIVE")
     is_blocked = Column(Boolean, server_default="FALSE", nullable=False)
+    mobile = Column(String, nullable=False)
     # passcode = Column(String, nullable=True)  # used for forgot user
     # passcode_expiry_time = Column(TIMESTAMP(timezone=True), nullable=True)
     # image = Column(String, nullable=False)
