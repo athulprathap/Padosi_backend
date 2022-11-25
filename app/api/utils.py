@@ -20,6 +20,7 @@ from app.api.schema import UserDevicePayload, MessagePayload
 from app.api.crud import save, send
 from app.api.routes.dynamic_link import DynamicLinks
 import requests
+from starlette.requests import Request
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -189,7 +190,7 @@ async def register_device(user_device: UserDevicePayload):
 async def send_message(message: MessagePayload):
     return await send(message)
 
-async def send_mail(email: schema.EmailSchema,request: requests):
+async def send_mail(email: schema.EmailSchema,request: Request):
     otp = random_with_N_digits(6)
     api_key = "AIzaSyBB5bZP3g8e84jeCppKrgxwxhZ85j8JeBE"
     domain = "https://padosii.page.link"

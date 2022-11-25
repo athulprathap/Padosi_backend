@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Response
+from fastapi import APIRouter, Depends, status, HTTPException, Response,Request
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from ..model import User
@@ -13,6 +13,7 @@ from ..database import get_db
 from .. utils import random_with_N_digits, send_otp_mail
 from .. utils import random_with_N_digits
 from app.api.utils import send_mail
+import requests
 from  ..oauth2 import get_current_user,get_current_active_user,access_token
 
 router = APIRouter(tags = ['Login'])
@@ -58,9 +59,9 @@ async def reset_password(userdata: schema.UserCreate,db: Session=Depends(get_db)
     user_query = db.query(User).filter(
         User.email == userdata.email)
     user = user_query.first()
-    request=random_with_N_digits(6)
+    # request=random_with_N_digits(6)
     if user:
-        status = await send_mail(userdata.email,request)
+        status = await send_mail(userdata.email,Request)
 
         if status:
             return {"message":"success"}
@@ -76,7 +77,6 @@ async def reset_password(userdata: schema.UserCreate,db: Session=Depends(get_db)
 def set_password(userdata:schema.SetPassword, db: Session=Depends(get_db)):
     user_query = db.query(User).filter(
         User.username == userdata.email,
-        User.passcode == userdata.passcode,
         User.is_deleted == False)
     user = user_query.first()
     if user:
