@@ -55,13 +55,13 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
 #     return {"already_exist":True, "access_token" : access_token}
 
 @router.post("/send-reset")
-async def reset_password(userdata: schema.UserCreate,db: Session=Depends(get_db)):
+async def reset_password(userdata: schema.UserCreate,request:Request,db: Session=Depends(get_db)):
     user_query = db.query(User).filter(
         User.email == userdata.email)
     user = user_query.first()
     # request=random_with_N_digits(6)
     if user:
-        status = await send_mail(userdata.email,Request)
+        status = await send_mail(userdata.email,request)
 
         if status:
             return {"message":"success"}

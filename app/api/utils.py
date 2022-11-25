@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
 import string
-from fastapi import status, HTTPException, Depends, APIRouter
+from fastapi import status, HTTPException, Depends, APIRouter,Request
 # from starlette.config import Config
 from random import choice
 from twilio.rest import Client
@@ -19,8 +19,6 @@ from starlette.config import Config
 from app.api.schema import UserDevicePayload, MessagePayload
 from app.api.crud import save, send
 from app.api.routes.dynamic_link import DynamicLinks
-import requests
-from starlette.requests import Request
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -190,7 +188,7 @@ async def register_device(user_device: UserDevicePayload):
 async def send_message(message: MessagePayload):
     return await send(message)
 
-async def send_mail(email: schema.EmailSchema,request: Request):
+async def send_mail(email: schema.EmailSchema,request):
     otp = random_with_N_digits(6)
     api_key = "AIzaSyBB5bZP3g8e84jeCppKrgxwxhZ85j8JeBE"
     domain = "https://padosii.page.link"
@@ -206,6 +204,7 @@ async def send_mail(email: schema.EmailSchema,request: Request):
     #         "iosFallbackLink": f"{request.url}/reset-password?code={otp}"
     #     },
     # }
+    print(request.url)
     params = {
     "androidInfo": {
       "androidPackageName":"com.app.padosii",
