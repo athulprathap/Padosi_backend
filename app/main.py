@@ -30,6 +30,7 @@ async def startup():
 @app.on_event("shutdown")  # database disconnect
 async def shutdown():
     await database.disconnect()
+    
 
 app.include_router(post.router)
 app.include_router(user.router)
