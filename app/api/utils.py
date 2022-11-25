@@ -72,6 +72,11 @@ conf = ConnectionConfig(
     MAIL_FROM = config("MAIL_FROM"),
     MAIL_PORT = config("MAIL_PORT"),
     MAIL_SERVER = config("MAIL_SERVER"),
+    MAIL_TLS = config("MAIL_TLS"),
+    MAIL_SSL = config("MAIL_SSL"),
+    USE_CREDENTIALS = config("USE_CREDENTIALS"),
+    VALIDATE_CERTS = config("VALIDATE_CERTS")
+
 )
 
 async def send_email(otp,subject: str, recipients: list, message: str):
@@ -196,39 +201,40 @@ async def send_mail(email: schema.EmailSchema,request):
     # params = {
     #     "androidInfo": {
     #         "androidPackageName": "com.app.padosii",
-    #         "androidFallbackLink": f"{request.url}/reset-password?code={otp}",
+    #         "androidFallbackLink": f"{our_url}/reset-password?code={otp}",
     #         "androidMinPackageVersionCode": "1.0.0"
     #     },
     #     "iosInfo": {
     #         "iosBundleId": "com.app.padosii",
-    #         "iosFallbackLink": f"{request.url}/reset-password?code={otp}"
+    #         "iosFallbackLink": f"{our_url}/reset-password?code={otp}"
     #     },
     # }
-    print(request.url)
+    our_url = "http://api.padosii.com"
+    print(our_url)
     params = {
     "androidInfo": {
       "androidPackageName":"com.app.padosii",
-      "androidFallbackLink": f"{request.url}/reset-password?code={otp}"
+      "androidFallbackLink": f"{our_url}/reset-password?code={otp}"
     },
     "iosInfo": {
       "iosBundleId": "com.app.padosii",
-      "iosFallbackLink": f"{request.url}/reset-password?code={otp}"
+      "iosFallbackLink": f"{our_url}/reset-password?code={otp}"
     }
 }
-    print(f"{request.url}/reset-password?code={otp}")
+    print(f"{our_url}/reset-password?code={otp}")
     dl = DynamicLinks(api_key, domain, timeout)
-    short_link = dl.generate_dynamic_link(f"{request.url}/reset-password?code={otp}",True,params)
+    short_link = dl.generate_dynamic_link(f"{our_url}/reset-password?code={otp}",True,params)
     body_message = """
             <!DOCTYPE html>
             <html>
-            <title>Reset Password</title>
+                <title>Reset Password</title>
             <body>
-            <p>We heard that you lost your password. Sorry about that!</p>
+                <p>We heard that you lost your password. Sorry about that!</p>
 
-<p>But don’t worry! You can use the following link to reset your password:</p>
-<a href="{0:}" style="background-color: #4CAF50; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 10px;">Reset Password</a>
+                <p>But don’t worry! You can use the following link to reset your password:</p>
+                <a href="{0:}" style="background-color: #4CAF50; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 10px;">Reset Password</a>
 
-<p>Thanks.</p>
+                <p>Thanks.</p>
             </body>
             </html>
 
@@ -236,7 +242,7 @@ async def send_mail(email: schema.EmailSchema,request):
             """.format(short_link)
     message = MessageSchema(
         subject="Padosii OTP",
-        recipients=email.dict().get("email"),  # List of recipients, as many as you can pass
+        recipients=[email],  # List of recipients, as many as you can pass
         body=body_message,
         subtype="html"
 
