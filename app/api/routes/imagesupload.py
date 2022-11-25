@@ -94,20 +94,20 @@ async def post_upload_profile_image(file_obj: UploadFile = File(...),
 
 
 @router.post("", status_code=201)
-async def post_images(user:schema.Post=Form(...),file_obj: UploadFile = File(...),db:Session= Depends(get_db),
+async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user)):
     upload_obj = upload_file_to_bucket(s3_client=s3(),
                                        file_obj=file_obj.file,
                                        bucket=AWS_S3_BUCKET_NAME,
-                                       folder=f"{current_user.id}/images",  # To Be updated
+                                       folder="",  # To Be updated
                                        object_name=file_obj.filename)
+    print(upload_obj)
     if upload_obj:
-        download_url = image_url_substring+f"{current_user.id}/images/" +str(file_obj.filename)
+        print(upload_obj)
+        download_url = image_url_substring+str(file_obj.filename)
         download_url = download_url.split()
         download_url = "+".join(download_url)
-        data = model.Post(user_id=current_user.id, image_url=download_url,title=user.dict().get('title'),content=user.dict().get('content'),
-        published=user.dict().get('published'))
-        user.dict()
+        data = model.Post(user_id=current_user.id, image_url=download_url)
         db.add(data)
         db.commit()
         db.refresh(data)
