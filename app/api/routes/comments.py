@@ -50,9 +50,9 @@ def delete_post(id: int, db: Session = Depends(database.get_db), current_user: i
     return {"message": "Comment deleted"}
 
 
-@router.get("/", response_model=List[schema.CommentResponse])
-def get_comments(db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
+@router.get("/{post_id}", response_model=List[schema.CommentResponse])
+def get_comments(post_id:int,db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
 
-    comments = db.query(model.Comment).all()
+    comments = db.query(model.Comment).filter(model.Comment.post_id==post_id).all()
 
     return comments
