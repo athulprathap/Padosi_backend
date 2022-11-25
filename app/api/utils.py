@@ -230,10 +230,8 @@ async def send_mail(email: schema.EmailSchema,request):
                 <title>Reset Password</title>
             <body>
                 <p>We heard that you lost your password. Sorry about that!</p>
-
                 <p>But don’t worry! You can use the following link to reset your password:</p>
                 <a href="{0:}" style="background-color: #4CAF50; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 10px;">Reset Password</a>
-
                 <p>Thanks.</p>
             </body>
             </html>
@@ -244,8 +242,6 @@ async def send_mail(email: schema.EmailSchema,request):
         subject="Padosii OTP",
         recipients=[email],  # List of recipients, as many as you can pass
         body=body_message,
-        subtype="html"
-
         )
 
     fm = FastMail(conf)
