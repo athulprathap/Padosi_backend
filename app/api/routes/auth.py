@@ -12,7 +12,7 @@ from ..database import get_db
 # from .. import models, schemas, utils, oauth2, config
 from .. utils import random_with_N_digits, send_otp_mail
 from .. utils import random_with_N_digits
-from app.api.routes.otp import send_mail
+from app.api.utils import send_mail
 from  ..oauth2 import get_current_user,get_current_active_user,access_token
 
 router = APIRouter(tags = ['Login'])
@@ -58,8 +58,9 @@ async def reset_password(userdata: schema.UserCreate,db: Session=Depends(get_db)
     user_query = db.query(User).filter(
         User.email == userdata.email)
     user = user_query.first()
+    request=random_with_N_digits(6)
     if user:
-        status = await send_mail(userdata.email)
+        status = await send_mail(userdata.email,request)
 
         if status:
             return {"message":"success"}

@@ -13,11 +13,13 @@ from datetime import datetime
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from typing import Dict, List
 from random import randint
+from app.api import schema
 from starlette.responses import JSONResponse
 from starlette.config import Config
 from app.api.schema import UserDevicePayload, MessagePayload
 from app.api.crud import save, send
-
+from app.api.routes.dynamic_link import DynamicLinks
+import requests
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -186,3 +188,61 @@ async def register_device(user_device: UserDevicePayload):
 
 async def send_message(message: MessagePayload):
     return await send(message)
+
+async def send_mail(email: schema.EmailSchema,request: requests):
+    otp = random_with_N_digits(6)
+    api_key = "AIzaSyBB5bZP3g8e84jeCppKrgxwxhZ85j8JeBE"
+    domain = "https://padosii.page.link"
+    timeout = 10
+    # params = {
+    #     "androidInfo": {
+    #         "androidPackageName": "com.app.padosii",
+    #         "androidFallbackLink": f"{request.url}/reset-password?code={otp}",
+    #         "androidMinPackageVersionCode": "1.0.0"
+    #     },
+    #     "iosInfo": {
+    #         "iosBundleId": "com.app.padosii",
+    #         "iosFallbackLink": f"{request.url}/reset-password?code={otp}"
+    #     },
+    # }
+    params = {
+    "androidInfo": {
+      "androidPackageName":"com.app.padosii",
+      "androidFallbackLink": f"{request.url}/reset-password?code={otp}"
+    },
+    "iosInfo": {
+      "iosBundleId": "com.app.padosii",
+      "iosFallbackLink": f"{request.url}/reset-password?code={otp}"
+    }
+}
+    print(f"{request.url}/reset-password?code={otp}")
+    dl = DynamicLinks(api_key, domain, timeout)
+    short_link = dl.generate_dynamic_link(f"{request.url}/reset-password?code={otp}",True,params)
+    body_message = """
+            <!DOCTYPE html>
+            <html>
+            <title>Reset Password</title>
+            <body>
+            <p>We heard that you lost your password. Sorry about that!</p>
+
+<p>But don’t worry! You can use the following link to reset your password:</p>
+<a href="{0:}" style="background-color: #4CAF50; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 10px;">Reset Password</a>
+
+<p>Thanks.</p>
+            </body>
+            </html>
+
+            
+            """.format(short_link)
+    message = MessageSchema(
+        subject="Padosii OTP",
+        recipients=email.dict().get("email"),  # List of recipients, as many as you can pass
+        body=body_message,
+        subtype="html"
+
+        )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    print(message)
+    return JSONResponse(status_code=200, content={"message": "email has been sent"})

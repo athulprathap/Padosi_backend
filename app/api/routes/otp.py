@@ -111,7 +111,7 @@ router = APIRouter(
 #     }
 
 
-async def send_mail(email: schema.EmailSchema,request: Request):
+async def send_mail(email: schema.EmailSchema,request: requests):
     otp = random_with_N_digits(6)
     api_key = "AIzaSyBB5bZP3g8e84jeCppKrgxwxhZ85j8JeBE"
     domain = "https://padosii.page.link"
