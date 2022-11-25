@@ -98,8 +98,8 @@ def create_user(user: schema.CreateUser, db: Session):
 
     return newUser
 
-def admin_create_user(user: admin, db: Session,):
-    newUser = User(username=user.username, email=user.email, password=user.password,is_admin=True)
+def admin_create_user(user:schema.admin, db: Session):
+    newUser = User(username=user.username, email=user.email, password=user.password,is_admin=True,mobile=user.mobile)
     db.add(newUser)
     db.commit()
     db.refresh(newUser)

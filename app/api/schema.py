@@ -24,6 +24,8 @@ class admin(BaseModel):
     username: str 
     email: str
     password: constr(min_length=6, max_length=30)
+    mobile: str
+    otp: str
     # image: str
     created_at = datetime 
     is_admin = str
@@ -309,5 +311,15 @@ class Registerresponse(UserOpt):
     is_deleted:bool
     is_admin:bool
     is_blocked:bool
+    class Config:
+        orm_mode = True
+
+class ShowProfile(BaseModel):
+    full_name: str
+    profile_pic: str
+    mobile: str
+    address: str
+    status: str
+    email: EmailStr
     class Config:
         orm_mode = True

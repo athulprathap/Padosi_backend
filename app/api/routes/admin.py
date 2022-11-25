@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.api.database import get_db
 from .. import model, schema, utils, oauth2, config
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-from .. utils import send_otp_mail, random_with_N_digits,verify
+from .. utils import send_otp_mail, random_with_N_digits,verify_otp
 from typing import List, Optional,Union
 from ..modules.userRepository import admin_register_new, updateUser,singleUser
 from ..schema import UserOpt,  User, UserUpdate
@@ -16,10 +16,18 @@ router = APIRouter(
 
 
 
-@router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=UserOpt)
+@router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=schema.admin)
 async def register(user:User, db:Session = Depends(get_db)):
     
     return admin_register_new(db=db, user=user)
+
+@router.post("/admin-otp-register",status_code=status.HTTP_201_CREATED, response_model=schema.Registerresponse)
+async def verify_otp_resgister(user:schema.admin,db: Session = Depends(get_db)):
+    status = await verify_otp(user.mobile,user.otp)
+    if status == "approved":
+        return admin_register_new(db=db, user=user)
+    else:
+        return ("Unable to verify OTP")
 
 @router.post("/login")
 def admin_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session=Depends(get_db)):
@@ -39,11 +47,17 @@ def admin_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Ses
     access_token = oauth2.access_token(data = {"user_id": user.id})
     return {"access_token" : access_token, "token_type": "bearer"}
 
-@router.get("/all_user")
+@router.get("/all_user",response_model=schema.ShowProfile)
 def get_all_user(db: Session=Depends(get_db)):
     user = db.query(model.User).all()
-    return user
+    address = db.query(model.Address).all()
+    profile = db.query(model.UserProfile).all()
 
+    add = []
+
+    
+    return profile
+ 
 @router.get("/reported_user")
 def report_user(db: Session=Depends(get_db)):
     user = db.query(model.ReportUser).all()
