@@ -1,4 +1,4 @@
-from fastapi import Depends, status, HTTPException, APIRouter, UploadFile, File
+from fastapi import Depends, status, HTTPException, APIRouter, UploadFile, File,Form
 from sqlalchemy.orm import Session
 from app.api.database import get_db
 from app.api import model, schema, utils, oauth2, config
@@ -94,7 +94,7 @@ async def post_upload_profile_image(file_obj: UploadFile = File(...),
 
 
 @router.post("", status_code=201)
-async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_db),
+async def post_images(user:schema.Post=Form(...),file_obj: UploadFile = File(...),db:Session= Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user)):
     upload_obj = upload_file_to_bucket(s3_client=s3(),
                                        file_obj=file_obj.file,
@@ -105,7 +105,9 @@ async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_d
         download_url = image_url_substring+f"{current_user.id}/images/" +str(file_obj.filename)
         download_url = download_url.split()
         download_url = "+".join(download_url)
-        data = model.Post(user_id=current_user.id, image_url=download_url)
+        data = model.Post(user_id=current_user.id, image_url=download_url,title=user.dict().get('title'),content=user.dict().get('content'),
+        published=user.dict().get('published'))
+        user.dict()
         db.add(data)
         db.commit()
         db.refresh(data)
