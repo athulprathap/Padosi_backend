@@ -1,7 +1,7 @@
 from email.policy import default
 from enum import unique
 import json
-from typing import Sequence
+from typing import Sequence, List
 from requests import session
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, Numeric, DateTime,Sequence,ARRAY,JSON
 from sqlalchemy.orm import relationship
@@ -279,3 +279,32 @@ class polls(Base):
     option3=Column(String,nullable=True)
     option4=Column(String,nullable=True)
     option6=Column(String,nullable=True)
+
+class Question(Base):
+    __tablename__ = "question"
+    id = Column(Integer,primary_key=True)
+    user_id = Column(Integer, ForeignKey(
+         "users.id", ondelete="CASCADE"),nullable = False)
+    choice_text = relationship("Choice", uselist=True)
+    question_text = Column(String(200))
+    pub_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+
+    choices = relationship('Choice', back_populates="question")
+# class Question(Base):
+# 	__tablename__ = "question"
+# 	id = Column(Integer, primary_key=True)
+# 	question_text = Column(String(200))
+# 	pub_date = Column(DateTime)
+    
+    
+# 	choices = relationship('Choice', back_populates="question")
+
+
+class Choice(Base):
+	__tablename__ = "choice"
+	id = Column(Integer, primary_key=True)
+	question_id = Column(Integer, ForeignKey('question.id', ondelete='CASCADE'))
+	choice_text = Column(String(200))
+	votes = Column(Integer, default=0)
+
+	question = relationship("Question", back_populates="choices")

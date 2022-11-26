@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import user,post,auth,votes,comments,events,search,admin,profiles,imagesupload,notifications,urgentalerts
+from app.api.routes import user,post,auth,votes,comments,events,search,admin,profiles,imagesupload,notifications,urgentalerts,polls
 from app.api.database import engine, Base,database
 from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,7 +39,6 @@ async def shutdown():
 app.include_router(post.router)
 app.include_router(user.router)
 app.include_router(auth.router)
-app.include_router(votes.router)
 app.include_router(comments.router)
 # app.include_router(otp.router)
 app.include_router(notifications.router)
@@ -49,6 +48,8 @@ app.include_router(admin.router)
 app.include_router(profiles.router)
 app.include_router(imagesupload.router)
 app.include_router(urgentalerts.router)
+# app.include_router(votes.router)
+app.include_router(polls.router)
 
 @app.get("/")
 def root():

@@ -5,11 +5,12 @@ from sqlalchemy.sql.sqltypes import TIMESTAMP
 from app.api.database import get_db
 from typing import Optional, Dict,List,Mapping
 import json
-from fastapi import FastAPI, Response,HTTPException
+from fastapi import FastAPI, Response,HTTPException,Depends
 from app.api import schema,model
 from sqlalchemy import func
 from app.api import dbmanager,FCMmanager
 from .model import Post,Like,User,urgent_alerts
+from  app.api.oauth2 import get_current_user
 from .database import database
 from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse,admin
 from sqlalchemy.orm import relationship
@@ -238,3 +239,42 @@ async def send(message: MessagePayload) -> Response:
     )
 
     return resp
+
+def create_question(db: Session, question: schema.QuestionCreate,user:int):
+	obj = model.Question(**question.dict(),user_id=user.id)
+	db.add(obj)
+	db.commit()
+	return obj
+
+def get_all_questions(db: Session):
+	return db.query(model.Question).all()
+
+def get_question(db:Session, qid):
+	return db.query(model.Question).filter(model.Question.id == qid).first()
+
+def edit_question(db: Session, qid, question: schema.QuestionCreate):
+	obj = db.query(model.Question).filter(model.Question.id == qid).first()
+	obj.question_text = question.question_text
+	obj.pub_date = question.pub_date
+	db.commit()
+	return obj
+
+def delete_question(db: Session, qid):
+	db.query(model.Question).filter(model.Question.id == qid).delete()
+	db.commit()
+
+
+# Choice
+
+
+def create_choice(db:Session, qid: int, choice: schema.ChoiceCreate):
+	obj = model.Choice(**choice.dict(), question_id=qid)
+	db.add(obj)
+	db.commit()
+	return obj
+
+def update_vote(choice_id: int, db:Session):
+	obj = db.query(model.Choice).filter(model.Choice.id == choice_id).first()
+	obj.votes += 1
+	db.commit()
+	return 

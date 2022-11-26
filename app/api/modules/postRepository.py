@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response, requests, status, HTTPException, Depends 
-from app.api.crud import personal_post, create, singlePost, allPost, update, delete, like_unlike, Like
-from app.api.schema import Post
+from app.api.crud import personal_post, create, singlePost, allPost, update, delete, like_unlike, Like,create_question
+from app.api.schema import Post,QuestionBase
 from typing import  Dict
 from  ..oauth2 import get_current_user,get_current_active_user
 from sqlalchemy.orm import Session
@@ -70,4 +70,5 @@ def delete_post(id: int, db: Session,  user : int = Depends(get_current_user)):
     
     return destroy
 
-
+def create_poll(post:QuestionBase, db: Session,  user:int= Depends(get_current_user)):
+    return create_question(post=post, db=db, user=user)

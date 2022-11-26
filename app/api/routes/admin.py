@@ -5,7 +5,7 @@ from .. import model, schema, utils, oauth2, config
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from .. utils import send_otp_mail, random_with_N_digits,verify_otp
 from typing import List, Optional,Union
-from ..modules.userRepository import admin_register_new, updateUser,singleUser
+from ..modules.userRepository import register_new, updateUser,singleUser,admin_register_new
 from ..schema import UserOpt,  User, UserUpdate
 
 
@@ -16,16 +16,17 @@ router = APIRouter(
 
 
 
-@router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=schema.admin)
-async def register(user:User, db:Session = Depends(get_db)):
+# @router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=schema.admin)
+# async def register(user:User, db:Session = Depends(get_db)):
     
-    return admin_register_new(db=db, user=user)
+#     return admin_register_new(db=db, user=user)
 
-@router.post("/admin-otp-register",status_code=status.HTTP_201_CREATED, response_model=schema.Registerresponse)
-async def verify_otp_resgister(user:schema.admin,db: Session = Depends(get_db)):
+@router.post("/verify-otp-register",status_code=status.HTTP_201_CREATED)
+async def verify_otp_resgister(user:User,db: Session = Depends(get_db)):
     status = await verify_otp(user.mobile,user.otp)
     if status == "approved":
         return admin_register_new(db=db, user=user)
+        db.query(model.User).filter(model.User.is_admin == True)
     else:
         return ("Unable to verify OTP")
 
@@ -47,16 +48,40 @@ def admin_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Ses
     access_token = oauth2.access_token(data = {"user_id": user.id})
     return {"access_token" : access_token, "token_type": "bearer"}
 
-@router.get("/all_user",response_model=schema.ShowProfile)
+@router.get("/all_user",response_model=schema.ShowProfile, response_model_exclude_unset=True)
 def get_all_user(db: Session=Depends(get_db)):
     user = db.query(model.User).all()
-    address = db.query(model.Address).all()
     profile = db.query(model.UserProfile).all()
+    address = db.query(model.Address).all()
+    # print (user)
+    # for i in user:
+    #     userid = i
+    #     # user = db.query(model.User).filter(model.User.id == userid).first()
+    #     address = db.query(model.Address).filter(model.Address.user_id == userid).first()
+    #     profile = db.query(model.UserProfile).filter(model.UserProfile.user_id == userid).first()
 
-    add = []
-
-    
-    return profile
+    #     add = []
+    #     for x in address:
+    #         data = db.query(model.Address).filter(model.Address.user_id == x.city,
+    #         model.Address.id == x.area).first()
+    #         if data:
+    #             add.append(data)
+    #     prof = []
+    #     for y in profile:
+    #         data_query = db.query(model.UserProfile).filter(model.UserProfile.user_id == y.image_url,
+    #         model.UserProfile.user_id == y.full_name).first()
+    #         if data_query:
+    #             prof.append(data_query)
+    #     us = []
+    #     for z in profile:
+    #         query = db.query(model.User).filter(model.User.id == z.status,model.User.id == z.mobile).first()
+    #         if data:
+    #             us.append(query)
+    # result_dict = {}
+    # result_dict["address"] = add
+    # result_dict["profile"] = prof
+    # result_dict["user"] = us
+    return profile,address,user
  
 @router.get("/reported_user")
 def report_user(db: Session=Depends(get_db)):

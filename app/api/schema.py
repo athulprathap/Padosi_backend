@@ -205,6 +205,42 @@ class Events(BaseModel):
     region: str
     pincode: int
 
+class ChoiceBase(BaseModel):
+	choice_text: List[str]
+	votes: int = 0
+
+class ChoiceCreate(ChoiceBase):
+	pass
+
+class ChoiceList(ChoiceBase):
+	id: int
+
+	class Config:
+		orm_mode = True
+
+
+# Question schema
+class QuestionBase(BaseModel):
+    question_text: str
+    pub_date: datetime
+    # choice_text: List[ChoiceList]
+# class QuestionBase(BaseModel):
+# 	question_text: str
+# 	pub_date: datetime
+#     choice_text: List[str]
+
+class QuestionCreate(QuestionBase):
+	pass
+
+class Question(QuestionBase):
+	id: int
+
+	class Config:
+		orm_mode = True
+
+class QuestionInfo(Question):
+	choices: List[ChoiceList] = []
+
 class EventRespond(BaseModel):
     event_id: int
     dir: int

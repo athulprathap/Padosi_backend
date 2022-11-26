@@ -372,7 +372,7 @@ def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db)):
     result_dict["user_profile"] = profile
     result_dict["posts"] = post
     result_dict["Address"] = address
-    result_dict["comment"] = comments
+    # result_dict["comment"] = comments
 
     return result_dict
 
