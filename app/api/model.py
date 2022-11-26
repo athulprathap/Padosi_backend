@@ -285,7 +285,7 @@ class Question(Base):
     id = Column(Integer,primary_key=True)
     user_id = Column(Integer, ForeignKey(
          "users.id", ondelete="CASCADE"),nullable = False)
-    choice_text = relationship("Choice", uselist=True)
+    choice_text = Column(String(200))
     question_text = Column(String(200))
     pub_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
 

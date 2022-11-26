@@ -204,6 +204,7 @@ class Events(BaseModel):
     area: str
     region: str
     pincode: int
+    is_private: bool
 
 class ChoiceBase(BaseModel):
 	choice_text: List[str]

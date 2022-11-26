@@ -33,7 +33,7 @@ async def verify_otp_resgister(user:User,db: Session = Depends(get_db)):
 @router.post("/login")
 def admin_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session=Depends(get_db)):
     user = db.query(model.User).filter(
-        model.User.username == user_credentials.username,
+        model.User.email == user_credentials.username,
         model.User.is_deleted == False,
         model.User.is_admin == True).first()
 

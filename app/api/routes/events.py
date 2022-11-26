@@ -13,9 +13,9 @@ router = APIRouter(
     prefix="/events",
     tags=["events"]
 )
-@router.get("/", response_model=List[schema.Events])
+@router.get("/")
 def get_Events(db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
-    events = db.query(model.Event).filter(model.Event.is_public == True).all()
+    events = db.query(model.Event).filter(model.Event.is_private == False).all()
     return events
 
 
@@ -31,7 +31,7 @@ def create_event(event: schema.Events, db: Session = Depends(database.get_db), c
 
     return new_event
 
-@router.get("/me", response_model=List[schema.Events])
+@router.get("/me")
 def get_Events_by_me(db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
 
     events = db.query(model.Event).filter(model.Event.user_id == current_user.id).all()
@@ -69,7 +69,7 @@ def delete_event(id: int, db: Session = Depends(database.get_db), current_user: 
 
     return ("deleted Successfully")
 
-@router.put("/{id}", status_code=status.HTTP_200_OK, response_model=schema.Events)
+@router.put("/{id}", status_code=status.HTTP_200_OK)
 def update_post(id, post: schema.Events, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
 
     event_query = db.query(model.Event).filter(
