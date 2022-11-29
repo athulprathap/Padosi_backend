@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from app.api.database import get_db
 from .. import model, schema, utils, oauth2, config
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-from .. utils import send_otp_mail, random_with_N_digits,verify_otp
-from typing import List, Optional,Union
-from ..modules.userRepository import register_new, updateUser,singleUser,admin_register_new
+from .. utils import send_otp_mail, random_with_N_digits, verify_otp
+from typing import List, Optional, Union
+from ..modules.userRepository import register_new, updateUser, singleUser, admin_register_new
 from ..schema import UserOpt,  User, UserUpdate
 
 
@@ -15,23 +15,23 @@ router = APIRouter(
 )
 
 
-
 # @router.post("/Register", status_code=status.HTTP_201_CREATED, response_model=schema.admin)
 # async def register(user:User, db:Session = Depends(get_db)):
-    
+
 #     return admin_register_new(db=db, user=user)
 
-@router.post("/verify-otp-register",status_code=status.HTTP_201_CREATED)
-async def verify_otp_resgister(user:User,db: Session = Depends(get_db)):
-    status = await verify_otp(user.mobile,user.otp)
+@router.post("/verify-otp-register", status_code=status.HTTP_201_CREATED)
+async def verify_otp_resgister(user: User, db: Session = Depends(get_db)):
+    status = await verify_otp(user.mobile, user.otp)
     if status == "approved":
         return admin_register_new(db=db, user=user)
         db.query(model.User).filter(model.User.is_admin == True)
     else:
         return ("Unable to verify OTP")
 
+
 @router.post("/login")
-def admin_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session=Depends(get_db)):
+def admin_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(model.User).filter(
         model.User.email == user_credentials.username,
         model.User.is_deleted == False,
@@ -39,97 +39,184 @@ def admin_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Ses
 
     if not user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"User doesn't exist ")
+                            detail=f"User doesn't exist ")
 
     if not utils.verify(user_credentials.password, user.password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Wrong OTP!! Please try again")
+                            detail=f"Wrong OTP!! Please try again")
 
-    access_token = oauth2.access_token(data = {"user_id": user.id})
-    return {"access_token" : access_token, "token_type": "bearer"}
+    access_token = oauth2.access_token(data={"user_id": user.id})
+    return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/all_user",response_model=schema.ShowProfile, response_model_exclude_unset=True)
-def get_all_user(db: Session=Depends(get_db)):
-    user = db.query(model.User).all()
-    profile = db.query(model.UserProfile).all()
-    address = db.query(model.Address).all()
-    # print (user)
-    # for i in user:
-    #     userid = i
-    #     # user = db.query(model.User).filter(model.User.id == userid).first()
-    #     address = db.query(model.Address).filter(model.Address.user_id == userid).first()
-    #     profile = db.query(model.UserProfile).filter(model.UserProfile.user_id == userid).first()
 
-    #     add = []
-    #     for x in address:
-    #         data = db.query(model.Address).filter(model.Address.user_id == x.city,
-    #         model.Address.id == x.area).first()
-    #         if data:
-    #             add.append(data)
-    #     prof = []
+@router.get("/all_user/")
+def get_all_user(db: Session = Depends(get_db)):
+    # userid=db.query(model.User).filter(model.User.id).all()
+    # print(userid)(model.User).filter(model.User.id == userid).first()
+    # user = db.query
+    # while True:
+    cusers = db.query(model.User).all()
+    cusersids = []
+    for cuser in cusers:
+        cusersids.append(cuser.__getattribute__("id"))
+        profile = db.query(model.UserProfile).filter(
+            model.UserProfile.user_id == cuser.__getattribute__("id")).first()
+        if not profile:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        address = db.query(model.Address).filter(
+            model.Address.user_id == cuser.__getattribute__("id")).first()
+        if not address:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        users = db.query(model.User).filter(
+            model.User.id == cuser.__getattribute__("id")).first()
+        return (users.__getattribute__('status'), users.__getattribute__('mobile'), profile.__getattribute__('image_url'),
+                profile.__getattribute__('full_name'), address.__getattribute__('city'), address.__getattribute__('area'))
+    # x = db.query(model.User).filter(model.User.id).all()
+    # status = []
+    # pro = []
+    # add=[]
+    # while (True):
+    #     i = 0
+    #     print(i)
+    #     i = i+1
+    #     for x in users:
+    #         interest = db.query(model.User).filter(model.User.id == x.status).first()
+    #         if interest:
+    #             status.append(interest)
     #     for y in profile:
-    #         data_query = db.query(model.UserProfile).filter(model.UserProfile.user_id == y.image_url,
-    #         model.UserProfile.user_id == y.full_name).first()
-    #         if data_query:
-    #             prof.append(data_query)
-    #     us = []
-    #     for z in profile:
-    #         query = db.query(model.User).filter(model.User.id == z.status,model.User.id == z.mobile).first()
+    #         # profile = db.query(model.UserProfile).filter(model.UserProfile.user_id == x.).all()
+    #         query = db.query(model.UserProfile).filter(model.UserProfile.user_id == y.mobile).first()
+    #         if query:
+    #             pro.append(query)
+    #     for z in address:
+    #         data = db.query(model.Address).filter(model.Address.user_id == z.area).first()
     #         if data:
-    #             us.append(query)
-    # result_dict = {}
-    # result_dict["address"] = add
-    # result_dict["profile"] = prof
-    # result_dict["user"] = us
-    return profile,address,user
- 
-@router.get("/reported_user")
-def report_user(db: Session=Depends(get_db)):
-    user = db.query(model.ReportUser).all()
+    #             add.append(query)
+
+    #     result_dict = {}
+    #     result_dict["status"] = status
+    #     result_dict["profile"] = pro
+    #     result_dict["address"] = add
+    #     return result_dict
+    #     cusers  = cusers + 1
+
+
+@router.get("/admin-profile")
+def get_profile(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    user = db.query(model.User).filter(model.User.id == current_user.id)
+    if user == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"user not found")
     return user
 
+
+@router.get("/reported_post")
+def report_user(db: Session = Depends(get_db)):
+    cusers = db.query(model.ReportPosts).all()
+    if cusers == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"user not found")
+    cusersids = []
+    for cuser in cusers:
+        cusersids.append(cuser.__getattribute__("id"))
+        post = db.query(model.Post).filter(model.Post.id ==
+                                           cuser.__getattribute__("post_id")).first()
+        r_p_user = post.__getattribute__("user_id")
+        print(r_p_user)
+        profile = db.query(model.UserProfile).filter(
+            model.UserProfile.user_id == cuser.__getattribute__("reported_by")).first()
+        rprofile = db.query(model.UserProfile).filter(
+            model.UserProfile.user_id == r_p_user).first()
+        if not profile:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        users = db.query(model.ReportPosts).filter(
+            model.ReportPosts.post_id == cuser.__getattribute__("post_id")).first()
+        # result_dict = {}
+        # result_dict["user_profile"] = profile
+        # result_dict["posts"] = post
+        # result_dict["Address"] = address
+        # # result_dict["images"] = images
+        # return result_dict
+        return {
+            "status": users.__getattribute__('status'), 
+            "message": users.__getattribute__('message'),
+            "post_id": users.__getattribute__('post_id'),
+            "reported_user_image_url": profile.__getattribute__('image_url'),
+            "reported_user_full_name": profile.__getattribute__('full_name'),
+            "reporting_user_image_url": rprofile.__getattribute__('image_url'),
+            "reporting_user_full_name": rprofile.__getattribute__('full_name'),
+            "category": "post"
+        }
+
+
+@router.get("/get-all-alerts")
+def alerts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    user = db.query(model.urgent_alerts).all()
+    if user == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"user not found")
+    return user
+
+
+@router.get("/get-all-post-userid/{user_id}")
+def post_user(user: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    user = db.query(model.Post).filter(model.Post.user_id == user).all
+    if user == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"user not found")
+    return user
+
+
 @router.put("/block")
-def block_user(id:int,db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user)):
+def block_user(id: int, db: Session = Depends(get_db),
+               current_user: int = Depends(oauth2.get_current_user)):
     value = db.query(model.User).filter(model.User.id == id).first()
     new = value.__getattribute__("is_blocked")
-    
+
     if new:
-        block = db.query(model.User).filter(model.User.id==id).update({'is_blocked': False})
+        block = db.query(model.User).filter(
+            model.User.id == id).update({'is_blocked': False})
         if current_user.is_admin:
             db.commit()
             return block
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     else:
-        block = db.query(model.User).filter(model.User.id==id).update({'is_blocked': True})
+        block = db.query(model.User).filter(
+            model.User.id == id).update({'is_blocked': True})
         if current_user.is_admin:
             db.commit()
             return block
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
+
 @router.get("/change_address")
-def change_address(db: Session=Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+def change_address(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     user = db.query(model.ChangeAddress).all()
     return user
 
+
 @router.put("/address_change")
-def address_change(id:int,allaow:schema.AdminPermission,db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    permission = db.query(model.ChangeAddress).filter(model.ChangeAddress.user_id == id).first()
+def address_change(id: int, allaow: schema.AdminPermission, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    permission = db.query(model.ChangeAddress).filter(
+        model.ChangeAddress.user_id == id).first()
     new = permission.__getattribute__("allowance")
     status = permission.__getattribute__("status")
 
     if new:
-        block = db.query(model.ChangeAddress).filter(model.ChangeAddress.user_id==id).update({'allowance': False})
-        block = db.query(model.ChangeAddress).filter(model.ChangeAddress.user_id==id).update({'status': "REJECTED"})
+        block = db.query(model.ChangeAddress).filter(
+            model.ChangeAddress.user_id == id).update({'allowance': False})
+        block = db.query(model.ChangeAddress).filter(
+            model.ChangeAddress.user_id == id).update({'status': "REJECTED"})
         if current_user.is_admin:
             db.commit()
             return block
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     else:
-        block = db.query(model.ChangeAddress).filter(model.ChangeAddress.user_id==id).update({'allowance': True})
-        block = db.query(model.ChangeAddress).filter(model.ChangeAddress.user_id==id).update({'status': "Resolved"})
+        block = db.query(model.ChangeAddress).filter(
+            model.ChangeAddress.user_id == id).update({'allowance': True})
+        block = db.query(model.ChangeAddress).filter(
+            model.ChangeAddress.user_id == id).update({'status': "Resolved"})
         if current_user.is_admin:
             db.commit()
             return block
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-

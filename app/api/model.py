@@ -19,7 +19,7 @@ class BaseModel:
 class User(Base,BaseModel):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String, nullable=True)
+    username = Column(String,unique = True,nullable=True)
     email = Column(String, unique=True, nullable=False)
     is_admin = Column(Boolean, server_default="FALSE", nullable=False)
     password = Column(String, nullable=False)
@@ -86,6 +86,7 @@ class ReportPosts(Base, BaseModel):
     reported_by = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     message = Column(String, nullable=False)
     count = Column(Integer,nullable=True)
+    status = Column(String, Enum("Pending","Rejected","Resolved", name = "status"),nullable = False, default="Pending")
 
 class Vote(Base):
     __tablename__ = "votes"

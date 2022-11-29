@@ -341,12 +341,12 @@ def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db)):
 
     comments = db.query(model.Comment).filter(
         model.Comment.user_id == user_id
-    )
+    ).first()
 
     # query_like = db.query(model.Like).filter(model.Like.post_id == post,user_id)
 
     address = db.query(model.Address).filter(
-        model.Address.user_id==user_id).all()
+        model.Address.user_id==user_id).first()
 
     # comment = db.query(model.Comment).filter(
     #     model.Comment.user_id==user_id).first()
@@ -379,7 +379,6 @@ def get_all_profile_deltails(user_id:int, db:Session = Depends(get_db)):
 @router.get("/all-delails-current-user")
 def get_all_profile_deltails(db:Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user)):
-
     profile = db.query(model.UserProfile).filter(
         model.UserProfile.user_id==current_user.id,
         model.UserProfile.is_deleted==False).first()
@@ -388,7 +387,8 @@ def get_all_profile_deltails(db:Session = Depends(get_db),
     #     model.Image.user_id == user_id,
     #     model.Image.is_deleted == False).all()
 
-    post = db.query(model.Post).filter(
+    post = db.query(model.Post, func.count(model.Like.post_id).label("likes")).join(model.Like, model.Like.post_id == model.Post.id,
+            isouter=True).group_by(model.Post.id).filter(
         model.Post.user_id==current_user.id,
         model.Post.is_deleted==False).all()
 
