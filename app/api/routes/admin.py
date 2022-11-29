@@ -69,8 +69,8 @@ def get_all_user(db: Session = Depends(get_db)):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         users = db.query(model.User).filter(
             model.User.id == cuser.__getattribute__("id")).first()
-        return (users.__getattribute__('status'), users.__getattribute__('mobile'), profile.__getattribute__('image_url'),
-                profile.__getattribute__('full_name'), address.__getattribute__('city'), address.__getattribute__('area'))
+        return {"status":users.__getattribute__('status'),"mobile": users.__getattribute__('mobile'), "profile_pic":profile.__getattribute__('image_url'),
+                "fullname":profile.__getattribute__('full_name'), "city":address.__getattribute__('city'), "area":address.__getattribute__('area')}
     # x = db.query(model.User).filter(model.User.id).all()
     # status = []
     # pro = []
