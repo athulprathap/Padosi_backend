@@ -13,7 +13,6 @@ from ..database import get_db
 from .. utils import random_with_N_digits, send_otp_mail
 from .. utils import random_with_N_digits
 from app.api.utils import send_mail
-import requests
 from  ..oauth2 import get_current_user,get_current_active_user,access_token
 
 router = APIRouter(tags = ['Login'])
@@ -28,8 +27,14 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Password")
 
     token = access_token(data={"users_id": user.id})
-
     return {"access_token": token,"token_type": "bearer"}
+
+@router.post('/refresh')
+def refresh(Authorize: AuthJWT = Depends()):
+    Authorize.jwt_refresh_token_required()
+    current_user = Authorize.get_jwt_subject()
+    new_access_token = Authorize.create_access_token(subject=current_user)
+    return {"access_token": new_access_token}
 
 # @router.post('/email/login')
 # def email_login(userdata: schema.EmailSchema, db: Session=Depends(get_db)):
@@ -204,8 +209,8 @@ def email_login(userdata: schema.UserCreate, db: Session=Depends(get_db)):
 
     user_profile = db.query(model.UserProfile).filter(model.UserProfile.user_id==user.id).first()
     if not user_profile:
-        access_token = oauth2.access_token(data = {"user_id": user.id})
+        access_token = oauth2.access_token(data = {"users_id": user.id})
         return {"already_exist":False, "access_token" : access_token, "token_type": "bearer"}
 
-    access_token = oauth2.access_token(data = {"user_id": user.id})
+    access_token = oauth2.access_token(data = {"users_id": user.id})
     return {"already_exist":True, "access_token" : access_token, "token_type": "bearer"}

@@ -192,7 +192,33 @@ def block_user(id: int, db: Session = Depends(get_db),
 @router.get("/change_address")
 def change_address(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     user = db.query(model.ChangeAddress).all()
-    return user
+    if user == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"user not found")
+    cusersids = []
+    for cuser in user:
+        cusersids.append(cuser.__getattribute__("id"))
+        post = db.query(model.Address).filter(model.Address.user_id ==
+                                           cuser.__getattribute__("user_id")).first()
+        r_p_user = post.__getattribute__("area")
+        r_p_user2 = post.__getattribute__("city")
+        print(r_p_user)
+        profile = db.query(model.UserProfile).filter(
+            model.UserProfile.user_id == cuser.__getattribute__("user_id")).first()
+        if not profile:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        users = db.query(model.ChangeAddress).filter(
+            model.Address.user_id == cuser.__getattribute__("user_id")).first()
+    return {
+            "status": users.__getattribute__('status'), 
+            "change_to_area": users.__getattribute__('change_area'),
+            "change_to_city": users.__getattribute__('change_city'),
+            "user_image": profile.__getattribute__('image_url'),
+            "user_fullname": profile.__getattribute__('full_name'),
+            "recent_area":r_p_user,
+            "recent_city":r_p_user2
+        }
+
 
 
 @router.put("/address_change")
