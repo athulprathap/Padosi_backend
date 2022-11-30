@@ -29,12 +29,7 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
     token = access_token(data={"users_id": user.id})
     return {"access_token": token,"token_type": "bearer"}
 
-@router.post('/refresh')
-def refresh(Authorize: AuthJWT = Depends()):
-    Authorize.jwt_refresh_token_required()
-    current_user = Authorize.get_jwt_subject()
-    new_access_token = Authorize.create_access_token(subject=current_user)
-    return {"access_token": new_access_token}
+
 
 # @router.post('/email/login')
 # def email_login(userdata: schema.EmailSchema, db: Session=Depends(get_db)):
