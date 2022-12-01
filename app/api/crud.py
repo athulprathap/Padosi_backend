@@ -10,7 +10,7 @@ from app.api import schema,model
 from sqlalchemy import func
 from app.api import dbmanager,FCMmanager
 from .model import Post,Like,User,urgent_alerts
-from  app.api.oauth2 import get_current_user
+from  app.api.oauth2 import get_current_user,access_token
 from .database import database
 from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse,admin
 from sqlalchemy.orm import relationship
@@ -55,7 +55,7 @@ def like_unlike(db: Session , like: schema.Likes,  user: int):
        return isLiked 
 
 def deactivate_user(current_user: schema.UserList):
-    query = "UPDATE my_users SET status='0' WHERE status='1' and email=:email"
+    query = "UPDATE my_users SET status='INACTIVE' WHERE status='ACTIVE' and email=:email"
     return database.execute(query, values= {"email": current_user.email})
 
 # Get a post
@@ -96,7 +96,7 @@ def create_user(user: schema.CreateUser, db: Session):
     db.add(newUser)
     db.commit()
     db.refresh(newUser)
-
+    
     return newUser
 
 def admin_create_user(user:schema.admin, db: Session):
