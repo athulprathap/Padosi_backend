@@ -351,6 +351,12 @@ class Registerresponse(UserOpt):
     class Config:
         orm_mode = True
 
+class registertoken(Registerresponse):
+    access_token: str
+    token_type: Optional[str]
+    class Config:
+        orm_mode = True
+
 class ShowProfile(BaseModel):
     full_name: str
     profile_pic: str

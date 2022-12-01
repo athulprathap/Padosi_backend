@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from .. import model, schema, utils, oauth2
 from .. utils import send_otp_mail, random_with_N_digits, operation_after_block,send_mobile_otp,verify_otp
 import pytz
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 utc = pytz.UTC
 
@@ -82,11 +83,19 @@ async def send_otp(userdata: schema.Usermobile):
     print(status)
     return {"response":status}
 
-@router.post("/verify-otp-register",status_code=status.HTTP_201_CREATED, response_model=schema.Registerresponse)
-async def verify_otp_resgister(user:User,db: Session = Depends(get_db)):
+@router.post("/verify-otp-register",status_code=status.HTTP_201_CREATED)
+async def verify_otp_resgister(user:User, db: Session = Depends(get_db)):
     status = await verify_otp(user.mobile,user.otp)
+    
     if status == "approved":
-        return register_new(db=db, user=user)
+        # register_new(db=db, user=user)
+        new_user = register_new(db =db,user=user)
+        print(new_user)
+        token = oauth2.access_token(data={"users_id": new_user.id})
+        new_user = new_user.__dict__
+        print(type(new_user))
+        new_user["token"] = token
+        return new_user
     else:
         return ("Unable to verify OTP")
 
@@ -94,9 +103,11 @@ async def verify_otp_resgister(user:User,db: Session = Depends(get_db)):
 
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=schema.Registerresponse)
-async def register(user:User, db:Session = Depends(get_db)):
-    return register_new(db=db, user=user)
+@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=schema.registertoken)
+async def register(user:User,user_info: OAuth2PasswordRequestForm = Depends(), db:Session = Depends(get_db)):
+    users = db.query(User).filter(User.email == user_info.username).first()
+    token = oauth2.access_token(data={"users_id": users.id})
+    return register_new(db=db, user=user , token=token)
 
 
 @router.get("/users", response_model=schema.Registerresponse)

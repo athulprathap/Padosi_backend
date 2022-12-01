@@ -27,7 +27,7 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Password")
 
     token = access_token(data={"users_id": user.id})
-    return {"access_token": token,"token_type": "bearer"}
+    return {"access_token": token}
 
 
 
