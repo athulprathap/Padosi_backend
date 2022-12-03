@@ -93,8 +93,8 @@ async def post_upload_profile_image(file_obj: UploadFile = File(...),
 
 
 
-@router.post("", status_code=201)
-async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_db),
+@router.post("/posts", status_code=201)
+async def post_images(pos:schema.Post = Depends(),file_obj: UploadFile = File(...),db:Session= Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user)):
     upload_obj = upload_file_to_bucket(s3_client=s3(),
                                        file_obj=file_obj.file,
@@ -107,7 +107,7 @@ async def post_images(file_obj: UploadFile = File(...),db:Session= Depends(get_d
         download_url = image_url_substring+str(file_obj.filename)
         download_url = download_url.split()
         download_url = "+".join(download_url)
-        data = model.Post(user_id=current_user.id, image_url=download_url)
+        data = model.Post(user_id=current_user.id, image_url=download_url, content = pos.content, title = pos.title, published=pos.published)
         db.add(data)
         db.commit()
         db.refresh(data)

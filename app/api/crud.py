@@ -24,7 +24,7 @@ def personal_post(db: Session, user:int):
 
 # Create a post
 def create(post:schema.Post, db: Session, user: int):
-    newPost = model.Post( title=post.title, content=post.content, published=post.published, user=user)
+    newPost = model.Post( title=post.title, content=post.content, published=post.published,image_url=post.image_url, user=user)
     
     db.add(newPost)
     db.commit()
@@ -240,11 +240,18 @@ async def send(message: MessagePayload) -> Response:
 
     return resp
 
-def create_question(db: Session, question: schema.QuestionCreate,user:int):
-	obj = model.Question(**question.dict(),user_id=user.id)
+def create_question(db: Session, questioninfo: schema.QuestionInfo,user:int):
+	obj = model.Question (**questioninfo.question.dict(), user_id = user.id)
 	db.add(obj)
 	db.commit()
+	db.refresh(obj)
+	for choice in questioninfo.choices:
+		choice_obj = model.Choice(choice.dict(),question_id = obj.id)
+		db.add(choice)
+	db.commit()
+  
 	return obj
+
 
 def get_all_questions(db: Session):
 	return db.query(model.Question).all()

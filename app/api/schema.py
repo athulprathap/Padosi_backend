@@ -73,9 +73,10 @@ class UserOpt(BaseModel):
         orm_mode = True
 
 class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
+    title: Optional[str]
+    content: Optional[str]
+    published: Optional[bool]
+    image_url: Optional[str]
     created_at = datetime
 
 class PostOpt(PostBase):  
@@ -239,8 +240,13 @@ class Question(QuestionBase):
 	class Config:
 		orm_mode = True
 
-class QuestionInfo(Question):
-	choices: List[ChoiceList] = []
+# class QuestionInfo(BaseModel):
+# 	choices: List[ChoiceList] = []
+#     question: Question
+
+class QuestionInfo(BaseModel):
+    choices: List[ChoiceList] = []
+    qusetion: Question
 
 class EventRespond(BaseModel):
     event_id: int
@@ -366,3 +372,6 @@ class ShowProfile(BaseModel):
     email: EmailStr
     class Config:
         orm_mode = True
+
+class CheckUsername(BaseModel):
+    username: str

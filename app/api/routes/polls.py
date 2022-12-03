@@ -17,8 +17,8 @@ def get_question_obj(db, qid):
 
 
 # @router.post("/questions/")
-@router.post("/questions/", response_model=schema.QuestionInfo)
-def create_question(question: schema.QuestionCreate, db: Session = Depends(get_db),user: int = Depends(get_current_user)):
+@router.post("/questions/")
+def create_question(question: schema.QuestionInfo, db: Session = Depends(get_db),user: int = Depends(get_current_user)):
 	return crud.create_question(db=db, question=question,user=user)
     # return {
     #     'qus': question.question_text,
@@ -31,7 +31,7 @@ def get_questions(db: Session = Depends(get_db)):
 
 	return crud.get_all_questions(db=db)
 
-@router.get("/questions/{qid}", response_model=schema.QuestionInfo)
+@router.get("/questions/{qid}")
 def get_question(qid: int, db: Session = Depends(get_db)):
 	return get_question_obj(db=db, qid=qid)
 	

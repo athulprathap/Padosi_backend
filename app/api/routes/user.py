@@ -19,64 +19,6 @@ utc = pytz.UTC
 router = APIRouter( tags = ['Users'])
 
 
-# @router.post("/register")
-# def user_register(user: UserRegister, db: Session = Depends(get_db)):
-#     email = db.query(models.User).filter(models.User.email == user.email).first()
-#     number = db.query(models.User).filter(models.User.number == user.number).first()
-#     if email:
-#         return HTTPException(status_code=400, detail=" Email already exist")
-#     elif number:
-#         return HTTPException(status_code=400, detail=" Number already exist")
-#     else:
-#         otp = asyncio.run(mail(user))
-#         obj = models.Otp(email=user.email, otp=otp)
-#         db.add(obj)
-#         db.commit()
-#         db.refresh(obj)
-
-#         return "otp send successfully Please Enter OTP"
-#         # password = set_password(user.password)
-#         # obj = models.User(name=user.name, number=user.number, email=user.email, address=user.address, password=password)
-#         # db.add(obj)
-#         # db.commit()
-#         # db.refresh(obj)
-#         # return "user registered Successfully"
-
-# @router.get("/otp")
-# async def get_otp(db:Session = Depends(get_db),
-#     current_user: int = Depends(oauth2.get_current_user)):
-#     # data = db.query(models.UserProfile).filter(models.UserProfile.user_id==current_user.id).first()
-#     user_query = db.query(model.User).filter(model.User.id == current_user.id)
-#     if user_query:
-#         otp = random_with_N_digits(6)
-#         await send_mobile_otp(db, user_query.mobile, otp)
-#         otp_expire = utc.localize(datetime.now() + timedelta(minutes=3))
-#         user_query.update({"passcode":otp,"passcode_expiry_time":otp_expire}, synchronize_session=False)
-#         db.commit()
-#         return {"message": "OTP has been sent!!"}
-#     return "user does not exist!"
-
-# @router.get("/otp")
-# async def get_otp(db:Session = Depends(get_db),
-#     current_user: int = Depends(oauth2.get_current_user)):
-#     data = db.query(model.UserProfile).filter(model.UserProfile.user_id==current_user.id).first()
-#     user_query = db.query(model.User).filter(model.User.id == current_user.id)
-#     if data:
-#         otp = random_with_N_digits(6)
-#         await send_mobile_otp(db, data.mobile, otp)
-#         otp_expire = utc.localize(datetime.now() + timedelta(minutes=3))
-#         user_query.update({"passcode":otp,"passcode_expiry_time":otp_expire}, synchronize_session=False)
-#         db.commit()
-#         return {"message": "OTP has been sent!!"}
-#     return "user does not exist!"
-
-# @router.post("/otp")
-# async def send_otp(userdata: schema.Usermobile,
-#                    db: Session = Depends(get_db)):
-
-#     status = await send_mobile_otp(userdata.mobile)
-    
-#     return status
 @router.post("/mobile-otp")
 async def send_otp(userdata: schema.Usermobile):
     status = await send_mobile_otp(userdata.mobile)
@@ -100,15 +42,14 @@ async def verify_otp_resgister(user:User, db: Session = Depends(get_db)):
         return ("Unable to verify OTP")
 
 
-
-
-
-@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=schema.registertoken)
-async def register(user:User,user_info: OAuth2PasswordRequestForm = Depends(), db:Session = Depends(get_db)):
-    users = db.query(User).filter(User.email == user_info.username).first()
-    token = oauth2.access_token(data={"users_id": users.id})
-    return register_new(db=db, user=user , token=token)
-
+@router.get("/check-username")
+async def check_username_exist(user:str,db: Session = Depends(get_db)):
+    query = db.query(model.User).filter(model.User.username == user).first()
+    if query:
+        raise HTTPException(status_code=status.HTTP_200_OK,detail="username already exist")
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="username not found")
+        
 
 @router.get("/users", response_model=schema.Registerresponse)
 async def get_user(db: Session = Depends(get_db), account_owner: int = Depends(get_current_user)):
@@ -164,33 +105,6 @@ def change_address(user: schema.ChangeAddress, db: Session = Depends(get_db), cu
 
     return address
 
-# @router.patch("/user/upload-profile-image")
-# async def upload_profile_image(
-#     file: UploadFile = File(...),
-#     currentUser: schema.UserList = Depends(get_current_active_user)
-# ):
-#     try:
-#         cwd = os.getcwd()
-#         path_image_dir = "upload-images/user/profile/"+str(currentUser.id) + "/"
-#         full_image_path = os.path.join(cwd, path_image_dir, file.filename)
-
-#         # Create directory if not exist
-#         if not os.path.exists(path_image_dir):
-#             os.mkdir(path_image_dir)
-
-#         # Rename file
-#         file_name = full_image_path.replace(file.filename, "profile.png")
-
-#         # Write file
-#         with open(file_name, 'wb+') as f:
-#             f.write(file.file.read())
-#             f.flush()
-#             f.close()
-
-#         return {"profile_image": os.path.join(path_image_dir, "profile.png")}
-
-#     except Exception as e:
-#         print(e)
 
 @router.delete("/user/profile")
 async def deactivate_account(
@@ -239,37 +153,6 @@ def update_address(id:int,add: schema.addressCreate, db: Session = Depends(get_d
         return change_address
     raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
     detail=f"pls contact admin")
-
-
-
-@router.post("/otp")
-async def send_otp(userdata: schema.UserCreate, db: Session = Depends(get_db)):
-    user_query = db.query(model.User).filter(model.User.email == userdata.email)
-    # temp base set password 123456
-    otp = str(random_with_N_digits(6))
-    password = utils.hash(otp)
-    status = send_otp_mail(userdata.email, otp)
-    profile_exist = False
-    user = user_query.first()
-    if user:
-        user_query.update({"password": password})
-        db.commit()
-        profile_data = db.query(model.UserProfile).filter(model.UserProfile.user_id==user.id).first()
-        if profile_data:
-            profile_exist = True
-        return {
-        "user_id": user.id,
-        "profile_exist": profile_exist
-        }
-
-    new_user = model.User(**userdata.dict(),username=userdata.email, password=password)
-    # adding user to the database
-    db.add(new_user)
-    db.commit()
-    return {
-        "user_id": new_user.id,
-        "profile_exist": profile_exist
-        }
 
 
 

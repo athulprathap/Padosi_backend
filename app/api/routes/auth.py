@@ -19,7 +19,7 @@ router = APIRouter(tags = ['Login'])
 
 @router.post('/login', response_model=Token)
 async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == user_info.username).first()
+    user = db.query(User).filter(User.email == user_info.username,User.status == "ACTIVE").first()
     if not user:
         raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials!")
     
