@@ -16,6 +16,10 @@ class User(BaseModel):
     # image: str
     created_at = datetime 
 
+class MobileLogin(BaseModel):
+    mobile: str
+    otp: str
+
 
 class CreateUser(User):
      pass

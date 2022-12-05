@@ -41,6 +41,19 @@ async def verify_otp_resgister(user:User, db: Session = Depends(get_db)):
     else:
         return ("Unable to verify OTP")
 
+@router.post("otp/login")
+async def verify_otp_login(user:User,db: Session = Depends(get_db)):
+    sattus = await verify_otp(user.mobile,user.otp)
+    if sattus == "approved":
+        user = db.query(model.User).filter(User.mobile == user_info.username,User.status == "ACTIVE").first()
+    if not user:
+        raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials!")
+    
+    if not utils.verify(user_info.password, user.password):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Password")
+
+    token = access_token(data={"users_id": user.id})
+    return {"access_token": token}
 
 @router.get("/check-username")
 async def check_username_exist(user:str,db: Session = Depends(get_db)):

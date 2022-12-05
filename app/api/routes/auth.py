@@ -1,18 +1,13 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Response,Request
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from ..model import User
+from app.api.model import User
 from ..schema import Token
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from .. import  utils, schema,model,oauth2
 from ..database import get_db
-# from google.oauth2 import id_token
-# from google.auth.transport import requests
-# from .. import models, schemas, utils, oauth2, config
-from .. utils import random_with_N_digits, send_otp_mail
-from .. utils import random_with_N_digits
-from app.api.utils import send_mail
+from app.api.utils import send_mail,verify_otp
 from  ..oauth2 import get_current_user,get_current_active_user,access_token
 
 router = APIRouter(tags = ['Login'])
@@ -29,7 +24,19 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
     token = access_token(data={"users_id": user.id})
     return {"access_token": token}
 
+@router.post("otp/login")
+async def verify_otp_login(user:schema.MobileLogin,db: Session = Depends(get_db)):
+    sattus = await verify_otp(user.mobile,user.otp)
+    if sattus == "approved":
+        user = db.query(model.User).filter(model.User.mobile ==user.mobile,model.User.status == "ACTIVE").first()
+        if not user:
+            raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials!")
+        
+        # if not utils.verify(user_info.password, user.password):
+        #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Password")
 
+        token = access_token(data={"users_id": user.id})
+        return {"access_token": token}
 
 # @router.post('/email/login')
 # def email_login(userdata: schema.EmailSchema, db: Session=Depends(get_db)):
@@ -71,6 +78,7 @@ async def reset_password(userdata: schema.UserCreate,request:Request,db: Session
     raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="User not found")
+
 
 
 @router.post("/set-password")
