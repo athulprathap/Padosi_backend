@@ -80,11 +80,12 @@ async def editUser(id, user: UserUpdate , db:Session = Depends(get_db), account_
     return my_update
 
 @router.delete("/user/{id}",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(id, db: Session = Depends(get_db), account_owner: int = Depends(get_current_user)):
+async def delete_user(id:int, db: Session = Depends(get_db), account_owner: int = Depends(get_current_user)):
     user=db.query(model.User).filter(model.User.id == id).first()
+    print(user)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"user with id {id} not found")
-    user.delete(synchronize_session=False)
+    db.delete(user)
     db.commit()
     return "deleted successfully"
 
