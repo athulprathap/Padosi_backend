@@ -12,7 +12,6 @@ class User(BaseModel):
     email: str
     password: constr(min_length=6, max_length=30)
     mobile: str
-    otp: str
     # image: str
     created_at = datetime 
 

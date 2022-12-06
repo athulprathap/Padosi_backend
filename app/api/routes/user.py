@@ -170,7 +170,7 @@ def update_address(id:int,add: schema.addressCreate, db: Session = Depends(get_d
 
 
 
-@router.get("/getcurrent_user",response_model=schema.User)
+@router.get("/getcurrent_user")
 def get_user(db: Session = Depends(get_db),
             current_user: int = Depends(oauth2.get_current_user)):
     return current_user

@@ -58,32 +58,32 @@ def get_all_user(db: Session = Depends(get_db)):
     cusers = db.query(model.User,model.UserProfile,model.Address).join(model.UserProfile,model.User.id==model.UserProfile.user_id).join(model.Address,model.User.id==model.Address.user_id).filter(model.User.is_admin == False).all()
     cusersids = []
     for cuser in cusers:
-        # userprofile = cuser[0].__dict__
-        # user = cuser[1].__dict__
-        # address = cuser[2].__dict__
-        # userprofile["user"]=user
-        # userprofile["address"]=address
-        # cusersids.append(userprofile)
-        # return(cusersids)
+        userprofile = cuser[0].__dict__
+        user = cuser[1].__dict__
+        address = cuser[2].__dict__
+        userprofile["user"]=user
+        userprofile["address"]=address
+        cusersids.append(userprofile)
+        return cusersids
 
-        profile = db.query(model.UserProfile).filter(
-            model.UserProfile.user_id == cuser.__getattribute__("id")).first()
-        if not profile:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        address = db.query(model.Address).filter(
-            model.Address.user_id == cuser.__getattribute__("id")).first()
-        if not address:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        x = cuser.__dict__
-        del x['password']
-        del x['passcode']
-        del x['passcode_expiry_time']
-        del x ['is_admin']
-        x["area"] = address.__getattribute__("area")
-        x["city"] = address.__getattribute__('city')
-        x["profile_pic"] = profile.__getattribute__('image_url')
-        x["fullname"] = profile.__getattribute__('full_name')
-        cusersids.append(cuser)
+        # profile = db.query(model.UserProfile).filter(
+        #     model.UserProfile.user_id == cuser.__getattribute__("id")).first()
+        # if not profile:
+        #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        # address = db.query(model.Address).filter(
+        #     model.Address.user_id == cuser.__getattribute__("id")).first()
+        # if not address:
+        #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        # x = cuser.__dict__
+        # del x['password']
+        # del x['passcode']
+        # del x['passcode_expiry_time']
+        # del x ['is_admin']
+        # x["area"] = address.__getattribute__("area")
+        # x["city"] = address.__getattribute__('city')
+        # x["profile_pic"] = profile.__getattribute__('image_url')
+        # x["fullname"] = profile.__getattribute__('full_name')
+        # cusersids.append(cuser)
         return cusersids
     # x = db.query(model.User).filter(model.User.id).all()
     # status = []
