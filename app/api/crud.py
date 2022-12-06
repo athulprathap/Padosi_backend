@@ -11,7 +11,7 @@ from sqlalchemy import func
 from app.api import dbmanager,FCMmanager
 from .model import Post,Like,User,urgent_alerts
 from  app.api.oauth2 import get_current_user,access_token
-from .database import database
+from app.api.database import database
 from .schema import Likes,Post,CreatePost,CreateUser,UserDevicePayload, MessagePayload, Response, ErrorResponse,admin
 from sqlalchemy.orm import relationship
 # from . import dbmanager,FCMmanager

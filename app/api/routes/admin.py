@@ -55,9 +55,17 @@ def get_all_user(db: Session = Depends(get_db)):
     # print(userid)(model.User).filter(model.User.id == userid).first()
     # user = db.query
     # while True:
-    cusers = db.query(model.User).filter(model.User.is_admin == False).all()
+    cusers = db.query(model.User,model.UserProfile,model.Address).join(model.UserProfile,model.User.id==model.UserProfile.user_id).join(model.Address,model.User.id==model.Address.user_id).filter(model.User.is_admin == False).all()
     cusersids = []
     for cuser in cusers:
+        # userprofile = cuser[0].__dict__
+        # user = cuser[1].__dict__
+        # address = cuser[2].__dict__
+        # userprofile["user"]=user
+        # userprofile["address"]=address
+        # cusersids.append(userprofile)
+        # return(cusersids)
+
         profile = db.query(model.UserProfile).filter(
             model.UserProfile.user_id == cuser.__getattribute__("id")).first()
         if not profile:
