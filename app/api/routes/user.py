@@ -41,7 +41,7 @@ async def verify_otp_resgister(user:User, db: Session = Depends(get_db)):
     else:
         return ("Unable to verify OTP")
 
-@router.post("otp/login")
+@router.post("/otp/login")
 async def verify_otp_login(user:User,db: Session = Depends(get_db)):
     sattus = await verify_otp(user.mobile,user.otp)
     if sattus == "approved":

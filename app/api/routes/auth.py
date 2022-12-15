@@ -24,7 +24,7 @@ async def login_user(user_info: OAuth2PasswordRequestForm = Depends(), db: Sessi
     token = access_token(data={"users_id": user.id})
     return {"access_token": token}
 
-@router.post("otp/login")
+@router.post("/otp/login")
 async def verify_otp_login(user:schema.MobileLogin,db: Session = Depends(get_db)):
     sattus = await verify_otp(user.mobile,user.otp)
     if sattus == "approved":
